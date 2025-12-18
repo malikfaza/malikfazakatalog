@@ -41,6 +41,7 @@
                         'pulse-glow': 'pulse-glow 3s infinite',
                         'twinkle': 'twinkle 4s ease-in-out infinite',
                         'spin-slow': 'spin 12s linear infinite',
+                        'spin-music': 'spin 4s linear infinite', // Animasi putar musik
                     },
                     keyframes: {
                         float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
@@ -58,7 +59,11 @@
         #cover-screen { background: radial-gradient(ellipse at bottom, #1e293b 0%, #020617 100%); transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1), opacity 1.2s ease-out; }
         #cover-screen.slide-up { transform: translateY(-100%); opacity: 0; pointer-events: none; }
         .star { position: absolute; background: white; border-radius: 50%; animation: twinkle var(--duration) ease-in-out infinite; opacity: var(--opacity); }
-        .music-rotating { animation: spin 3s linear infinite; }
+        
+        /* Class untuk memutar ikon musik */
+        .music-rotating i { animation: spin-music 3s linear infinite; }
+        @keyframes spin-music { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: #020617; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
@@ -80,43 +85,33 @@
 
     <!-- AUDIO ELEMENT -->
     <audio id="bg-audio" loop>
-        <source src="musik.mp3" type="audio/mpeg">
+        <source src="musik.mp3" type="audio/mpeg/mp3">
     </audio>
 
-    <!-- Music Control Button -->
-    <button id="music-btn" onclick="toggleMusic()" class="fixed bottom-24 right-6 z-[60] w-12 h-12 bg-white/10 backdrop-blur-md border border-cyan-400/30 rounded-full flex items-center justify-center text-cyan-400 hover:bg-cyan-400 hover:text-white transition-all duration-300 hidden shadow-[0_0_20px_rgba(34,211,238,0.3)]">
+    <!-- Music Control Button (Kiri Bawah) -->
+    <button id="music-btn" onclick="toggleMusic()" class="fixed bottom-6 left-6 z-[60] w-12 h-12 bg-white/10 backdrop-blur-md border border-cyan-400/30 rounded-full flex items-center justify-center text-cyan-400 hover:bg-cyan-400 hover:text-white transition-all duration-300 hidden shadow-[0_0_20px_rgba(34,211,238,0.3)]">
         <i class="fas fa-music text-lg"></i>
     </button>
 
-    <!-- Admin Login Button -->
-    <button id="admin-login-btn" onclick="toggleAdminModal()" class="fixed bottom-6 right-6 z-[60] w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center text-slate-400 hover:bg-cyan-600 hover:text-white transition-all duration-300 shadow-lg hidden">
-        <i class="fas fa-lock text-sm"></i>
-    </button>
-    
-    <!-- Admin Logout Button -->
-    <button id="admin-logout-btn" onclick="adminLogout()" class="fixed bottom-6 right-6 z-[60] w-12 h-12 bg-red-500/80 backdrop-blur-md border border-red-400 rounded-full flex items-center justify-center text-white hover:bg-red-600 transition-all duration-300 shadow-lg hidden">
-        <i class="fas fa-sign-out-alt text-sm"></i>
-    </button>
-
-    <!-- Add Item Button -->
-    <button id="add-item-btn" onclick="openFormModal()" class="fixed bottom-40 right-6 z-[60] w-12 h-12 bg-green-500/80 backdrop-blur-md border border-green-400 rounded-full flex items-center justify-center text-white hover:bg-green-600 transition-all duration-300 shadow-lg hidden animate-bounce">
-        <i class="fas fa-plus text-lg"></i>
-    </button>
-    
-    <!-- Add FAQ Button -->
-    <button id="add-faq-btn" onclick="openFaqModal()" class="fixed bottom-56 right-6 z-[60] w-12 h-12 bg-sky-500/80 backdrop-blur-md border border-sky-400 rounded-full flex items-center justify-center text-white hover:bg-sky-600 transition-all duration-300 shadow-lg hidden">
-        <i class="fas fa-question text-lg"></i>
-    </button>
-
-    <!-- Restore Data Button -->
-    <button id="restore-data-btn" onclick="uploadInitialData()" class="fixed top-24 right-6 z-[60] px-4 py-2 bg-yellow-600/80 backdrop-blur-md border border-yellow-400 rounded-full text-white text-xs hover:bg-yellow-500 transition-all duration-300 shadow-lg hidden">
-        <i class="fas fa-cloud-upload-alt mr-2"></i> Upload Data Bawaan
-    </button>
-
-    <!-- Reset Data Button (New) -->
-    <button id="reset-data-btn" onclick="resetDatabase()" class="fixed top-36 right-6 z-[60] px-4 py-2 bg-red-600/80 backdrop-blur-md border border-red-400 rounded-full text-white text-xs hover:bg-red-500 transition-all duration-300 shadow-lg hidden">
-        <i class="fas fa-bomb mr-2"></i> Hapus Semua Data
-    </button>
+    <!-- Floating Action Buttons (Hanya muncul saat Admin Login) -->
+    <div id="admin-tools" class="hidden">
+        <!-- Add Item -->
+        <button onclick="openFormModal()" class="fixed bottom-24 right-6 z-[60] w-12 h-12 bg-green-500/80 backdrop-blur-md border border-green-400 rounded-full flex items-center justify-center text-white hover:bg-green-600 transition-all duration-300 shadow-lg animate-bounce" title="Tambah Desain">
+            <i class="fas fa-plus text-lg"></i>
+        </button>
+        <!-- Add FAQ -->
+        <button onclick="openFaqModal()" class="fixed bottom-40 right-6 z-[60] w-12 h-12 bg-sky-500/80 backdrop-blur-md border border-sky-400 rounded-full flex items-center justify-center text-white hover:bg-sky-600 transition-all duration-300 shadow-lg" title="Tambah FAQ">
+            <i class="fas fa-question text-lg"></i>
+        </button>
+        <!-- Upload Initial Data -->
+        <button id="restore-data-btn" onclick="uploadInitialData()" class="fixed top-24 right-6 z-[60] px-4 py-2 bg-yellow-600/80 backdrop-blur-md border border-yellow-400 rounded-full text-white text-xs hover:bg-yellow-500 transition-all duration-300 shadow-lg">
+            <i class="fas fa-cloud-upload-alt mr-2"></i> Upload Data Bawaan
+        </button>
+        <!-- Reset Data -->
+        <button id="reset-data-btn" onclick="resetDatabase()" class="fixed top-36 right-6 z-[60] px-4 py-2 bg-red-600/80 backdrop-blur-md border border-red-400 rounded-full text-white text-xs hover:bg-red-500 transition-all duration-300 shadow-lg">
+            <i class="fas fa-bomb mr-2"></i> Hapus Semua Data
+        </button>
+    </div>
 
     <!-- === COVER SCREEN === -->
     <section id="cover-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center text-center overflow-hidden">
@@ -161,15 +156,22 @@
                         MALIK<span class="text-cyan-glow">FAZA</span>
                     </a>
                 </div>
-                <div class="hidden md:block">
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center">
                     <div class="ml-10 flex items-baseline space-x-6">
                         <a href="#home" class="hover:text-cyan-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Beranda</a>
                         <a href="#catalog" class="hover:text-cyan-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Katalog</a>
                         <a href="#features" class="hover:text-cyan-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Fitur</a>
                         <a href="#faq" class="hover:text-cyan-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">FAQ</a>
                         <a href="https://wa.me/6285161141114" target="_blank" class="px-5 py-2 bg-gradient-to-r from-cyan-600 to-sky-500 text-white font-bold rounded-full hover:shadow-[0_0_15px_rgba(34,211,238,0.6)] transition-all transform hover:scale-105 text-xs tracking-wider">HUBUNGI KAMI</a>
+                        
+                        <!-- Login Button Desktop -->
+                        <button id="nav-auth-desktop" onclick="toggleAdminModal()" class="text-slate-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors border border-white/10 hover:border-cyan-400 ml-4 flex items-center">
+                            <i class="fas fa-lock mr-2 text-xs"></i> Login
+                        </button>
                     </div>
                 </div>
+                <!-- Mobile Menu Button -->
                 <div class="-mr-2 flex md:hidden">
                     <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-cyan-400 hover:text-white focus:outline-none" onclick="toggleMobileMenu()">
                         <i class="fas fa-bars text-xl"></i>
@@ -177,6 +179,7 @@
                 </div>
             </div>
         </div>
+        <!-- Mobile Menu -->
         <div class="hidden md:hidden bg-[#020617]/95 backdrop-blur-xl border-t border-white/10" id="mobile-menu">
             <div class="px-4 pt-4 pb-6 space-y-2">
                 <a href="#home" class="block px-3 py-2 rounded-lg text-sm font-medium text-white hover:bg-white/5 hover:text-cyan-400">Beranda</a>
@@ -184,6 +187,11 @@
                 <a href="#features" class="block px-3 py-2 rounded-lg text-sm font-medium text-white hover:bg-white/5 hover:text-cyan-400">Fitur</a>
                 <a href="#faq" class="block px-3 py-2 rounded-lg text-sm font-medium text-white hover:bg-white/5 hover:text-cyan-400">FAQ</a>
                 <a href="https://wa.me/6285161141114" class="block px-3 py-2 rounded-lg text-sm font-medium text-cyan-400 hover:bg-white/5">Kontak</a>
+                
+                <!-- Login Button Mobile -->
+                <button id="nav-auth-mobile" onclick="toggleAdminModal()" class="block w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-white border-t border-white/10 mt-2 pt-3">
+                    <i class="fas fa-lock mr-2 text-xs"></i> Login Admin
+                </button>
             </div>
         </div>
     </nav>
@@ -814,33 +822,44 @@
         }
 
         window.updateAdminUI = function() {
-            const loginBtn = document.getElementById('admin-login-btn');
-            const logoutBtn = document.getElementById('admin-logout-btn');
-            const addBtn = document.getElementById('add-item-btn');
+            const navAuthDesktop = document.getElementById('nav-auth-desktop');
+            const navAuthMobile = document.getElementById('nav-auth-mobile');
+            const adminTools = document.getElementById('admin-tools');
             const badge = document.getElementById('admin-badge');
-            const addFaqBtn = document.getElementById('add-faq-btn');
-            const restoreBtn = document.getElementById('restore-data-btn');
-            const resetBtn = document.getElementById('reset-data-btn');
 
             if (window.isAdmin) {
-                loginBtn.classList.add('hidden');
-                logoutBtn.classList.remove('hidden');
-                addBtn.classList.remove('hidden');
-                addFaqBtn.classList.remove('hidden');
+                // Change Login to Logout (Desktop)
+                navAuthDesktop.innerHTML = '<i class="fas fa-sign-out-alt mr-2 text-xs"></i> Logout';
+                navAuthDesktop.setAttribute('onclick', 'adminLogout()');
+                navAuthDesktop.classList.add('text-red-400', 'border-red-400/50');
+                navAuthDesktop.classList.remove('text-slate-400', 'border-white/10');
+
+                // Change Login to Logout (Mobile)
+                navAuthMobile.innerHTML = '<i class="fas fa-sign-out-alt mr-2 text-xs"></i> Logout';
+                navAuthMobile.setAttribute('onclick', 'adminLogout()');
+                navAuthMobile.classList.add('text-red-400');
+                navAuthMobile.classList.remove('text-slate-300');
+
+                // Show Admin Tools
+                adminTools.classList.remove('hidden');
                 badge.classList.remove('hidden');
-                
-                // Show admin tools unconditionally
-                restoreBtn.classList.remove('hidden');
-                resetBtn.classList.remove('hidden');
 
             } else {
-                loginBtn.classList.remove('hidden');
-                logoutBtn.classList.add('hidden');
-                addBtn.classList.add('hidden');
-                addFaqBtn.classList.add('hidden');
+                // Change Logout to Login (Desktop)
+                navAuthDesktop.innerHTML = '<i class="fas fa-lock mr-2 text-xs"></i> Login';
+                navAuthDesktop.setAttribute('onclick', 'toggleAdminModal()');
+                navAuthDesktop.classList.remove('text-red-400', 'border-red-400/50');
+                navAuthDesktop.classList.add('text-slate-400', 'border-white/10');
+
+                // Change Logout to Login (Mobile)
+                navAuthMobile.innerHTML = '<i class="fas fa-lock mr-2 text-xs"></i> Login Admin';
+                navAuthMobile.setAttribute('onclick', 'toggleAdminModal()');
+                navAuthMobile.classList.remove('text-red-400');
+                navAuthMobile.classList.add('text-slate-300');
+
+                // Hide Admin Tools
+                adminTools.classList.add('hidden');
                 badge.classList.add('hidden');
-                restoreBtn.classList.add('hidden');
-                resetBtn.classList.add('hidden');
             }
             window.renderCatalog(); 
             window.renderFaq();
@@ -971,7 +990,6 @@
         const coverScreen = document.getElementById('cover-screen');
         const audio = document.getElementById('bg-audio');
         const musicBtn = document.getElementById('music-btn');
-        const adminBtn = document.getElementById('admin-login-btn');
         const musicIcon = musicBtn.querySelector('i');
         let isPlaying = false;
 
@@ -987,7 +1005,7 @@
             });
             coverScreen.classList.add('slide-up');
             musicBtn.classList.remove('hidden');
-            adminBtn.classList.remove('hidden'); 
+            // adminBtn.classList.remove('hidden'); // Removed, handled by navbar
             document.body.style.overflow = 'auto';
         }
 
