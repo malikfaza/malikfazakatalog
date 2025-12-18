@@ -28,15 +28,8 @@
                     colors: {
                         midnight: '#020617', 
                         darkblue: '#0f172a',
-                        cyan: {
-                            400: '#22d3ee',
-                            500: '#06b6d4',
-                            600: '#0891b2',
-                        },
-                        sky: {
-                            400: '#38bdf8',
-                            500: '#0ea5e9',
-                        }
+                        cyan: { 400: '#22d3ee', 500: '#06b6d4', 600: '#0891b2' },
+                        sky: { 400: '#38bdf8', 500: '#0ea5e9' }
                     },
                     fontFamily: {
                         heading: ['"Cinzel"', 'serif'],
@@ -50,18 +43,9 @@
                         'spin-slow': 'spin 12s linear infinite',
                     },
                     keyframes: {
-                        float: {
-                            '0%, 100%': { transform: 'translateY(0)' },
-                            '50%': { transform: 'translateY(-10px)' },
-                        },
-                        'pulse-glow': {
-                            '0%, 100%': { opacity: 1, filter: 'brightness(100%)' },
-                            '50%': { opacity: 0.8, filter: 'brightness(130%)' },
-                        },
-                        twinkle: {
-                            '0%, 100%': { opacity: 0.3, transform: 'scale(0.8)' },
-                            '50%': { opacity: 1, transform: 'scale(1.2)' },
-                        }
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
+                        'pulse-glow': { '0%, 100%': { opacity: 1, filter: 'brightness(100%)' }, '50%': { opacity: 0.8, filter: 'brightness(130%)' } },
+                        twinkle: { '0%, 100%': { opacity: 0.3, transform: 'scale(0.8)' }, '50%': { opacity: 1, transform: 'scale(1.2)' } }
                     }
                 }
             }
@@ -69,96 +53,23 @@
     </script>
 
     <style>
-        body {
-            background-color: #020617;
-            color: #e2e8f0;
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            margin: 0;
-            overflow: hidden; /* Awalnya hidden untuk cover */
-        }
-
-        /* Canvas Background */
-        #canvas-bg {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: -1;
-            background: radial-gradient(circle at center, #0f172a 0%, #020617 80%); 
-        }
-
-        /* COVER STYLES */
-        #cover-screen {
-            background: radial-gradient(ellipse at bottom, #1e293b 0%, #020617 100%);
-            transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1), opacity 1.2s ease-out;
-        }
-        
-        #cover-screen.slide-up {
-            transform: translateY(-100%);
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .star {
-            position: absolute;
-            background: white;
-            border-radius: 50%;
-            animation: twinkle var(--duration) ease-in-out infinite;
-            opacity: var(--opacity);
-        }
-
+        body { background-color: #020617; color: #e2e8f0; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; overflow: hidden; }
+        #canvas-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(circle at center, #0f172a 0%, #020617 80%); }
+        #cover-screen { background: radial-gradient(ellipse at bottom, #1e293b 0%, #020617 100%); transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1), opacity 1.2s ease-out; }
+        #cover-screen.slide-up { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+        .star { position: absolute; background: white; border-radius: 50%; animation: twinkle var(--duration) ease-in-out infinite; opacity: var(--opacity); }
         .music-rotating { animation: spin 3s linear infinite; }
-
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: #020617; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #22d3ee; }
-
-        /* Card Hover */
-        .card-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px -5px rgba(34, 211, 238, 0.2); 
-            border-color: rgba(34, 211, 238, 0.4);
-        }
-
-        .text-cyan-glow {
-            background: linear-gradient(to right, #22d3ee, #38bdf8, #22d3ee);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-size: 200% auto;
-            text-shadow: 0 0 15px rgba(34, 211, 238, 0.3);
-            animation: shine 4s linear infinite;
-        }
-
-        @keyframes shine {
-            0% { background-position: 0% center; }
-            100% { background-position: 200% center; }
-        }
-        
-        select {
-            -webkit-appearance: none; -moz-appearance: none; appearance: none;
-            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2322d3ee' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
-            background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em;
-        }
-
-        /* Modal Styles */
-        .modal {
-            transition: opacity 0.3s ease, visibility 0.3s ease;
-        }
-        .modal.hidden {
-            opacity: 0;
-            visibility: hidden;
-            pointer-events: none;
-        }
-        .modal:not(.hidden) {
-            opacity: 1;
-            visibility: visible;
-            pointer-events: auto;
-        }
-
-        /* FAQ Animation */
+        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 30px -5px rgba(34, 211, 238, 0.2); border-color: rgba(34, 211, 238, 0.4); }
+        .text-cyan-glow { background: linear-gradient(to right, #22d3ee, #38bdf8, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 200% auto; text-shadow: 0 0 15px rgba(34, 211, 238, 0.3); animation: shine 4s linear infinite; }
+        @keyframes shine { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
+        select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2322d3ee' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; }
+        .modal { transition: opacity 0.3s ease, visibility 0.3s ease; }
+        .modal.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+        .modal:not(.hidden) { opacity: 1; visibility: visible; pointer-events: auto; }
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
         details[open] summary ~ * { animation: sweep .3s ease-in-out; }
@@ -182,19 +93,24 @@
         <i class="fas fa-lock text-sm"></i>
     </button>
     
-    <!-- Admin Logout Button (Hidden by default) -->
+    <!-- Admin Logout Button -->
     <button id="admin-logout-btn" onclick="adminLogout()" class="fixed bottom-6 right-6 z-[60] w-12 h-12 bg-red-500/80 backdrop-blur-md border border-red-400 rounded-full flex items-center justify-center text-white hover:bg-red-600 transition-all duration-300 shadow-lg hidden">
         <i class="fas fa-sign-out-alt text-sm"></i>
     </button>
 
-    <!-- Add Item Button (Only Visible for Admin) -->
+    <!-- Add Item Button -->
     <button id="add-item-btn" onclick="openFormModal()" class="fixed bottom-40 right-6 z-[60] w-12 h-12 bg-green-500/80 backdrop-blur-md border border-green-400 rounded-full flex items-center justify-center text-white hover:bg-green-600 transition-all duration-300 shadow-lg hidden animate-bounce">
         <i class="fas fa-plus text-lg"></i>
     </button>
     
-    <!-- Add FAQ Button (Only Visible for Admin) -->
+    <!-- Add FAQ Button -->
     <button id="add-faq-btn" onclick="openFaqModal()" class="fixed bottom-56 right-6 z-[60] w-12 h-12 bg-sky-500/80 backdrop-blur-md border border-sky-400 rounded-full flex items-center justify-center text-white hover:bg-sky-600 transition-all duration-300 shadow-lg hidden">
         <i class="fas fa-question text-lg"></i>
+    </button>
+
+    <!-- Restore Data Button (Hidden by default, shown if needed) -->
+    <button id="restore-data-btn" onclick="uploadInitialData()" class="fixed top-24 right-6 z-[60] px-4 py-2 bg-yellow-600/80 backdrop-blur-md border border-yellow-400 rounded-full text-white text-xs hover:bg-yellow-500 transition-all duration-300 shadow-lg hidden">
+        <i class="fas fa-cloud-upload-alt mr-2"></i> Upload Data Bawaan
     </button>
 
     <!-- === COVER SCREEN === -->
@@ -240,7 +156,6 @@
                         MALIK<span class="text-cyan-glow">FAZA</span>
                     </a>
                 </div>
-                <!-- Desktop Menu -->
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-6">
                         <a href="#home" class="hover:text-cyan-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Beranda</a>
@@ -250,7 +165,6 @@
                         <a href="https://wa.me/6285161141114" target="_blank" class="px-5 py-2 bg-gradient-to-r from-cyan-600 to-sky-500 text-white font-bold rounded-full hover:shadow-[0_0_15px_rgba(34,211,238,0.6)] transition-all transform hover:scale-105 text-xs tracking-wider">HUBUNGI KAMI</a>
                     </div>
                 </div>
-                <!-- Mobile Menu Button -->
                 <div class="-mr-2 flex md:hidden">
                     <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-cyan-400 hover:text-white focus:outline-none" onclick="toggleMobileMenu()">
                         <i class="fas fa-bars text-xl"></i>
@@ -258,7 +172,6 @@
                 </div>
             </div>
         </div>
-        <!-- Mobile Menu -->
         <div class="hidden md:hidden bg-[#020617]/95 backdrop-blur-xl border-t border-white/10" id="mobile-menu">
             <div class="px-4 pt-4 pb-6 space-y-2">
                 <a href="#home" class="block px-3 py-2 rounded-lg text-sm font-medium text-white hover:bg-white/5 hover:text-cyan-400">Beranda</a>
@@ -274,7 +187,6 @@
     <section id="home" class="relative min-h-[90vh] flex items-center justify-center pt-20 overflow-hidden">
         <div class="absolute top-1/4 -left-20 w-64 h-64 bg-cyan-500/10 rounded-full blur-[80px] animate-float"></div>
         <div class="absolute bottom-1/4 -right-20 w-80 h-80 bg-sky-600/10 rounded-full blur-[100px] animate-float" style="animation-delay: 2s"></div>
-        
         <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center" data-aos="fade-up">
             <div class="inline-block mb-4 px-3 py-1 border border-cyan-500/30 rounded-full bg-cyan-500/5 backdrop-blur-sm">
                 <span class="text-cyan-300 text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase">Malik Faza Studio</span>
@@ -299,15 +211,13 @@
                 <h2 class="text-2xl md:text-4xl font-heading font-bold mb-3 text-white">Koleksi Desain</h2>
                 <div class="w-16 h-1 bg-gradient-to-r from-cyan-400 to-sky-500 mx-auto rounded-full mb-4"></div>
                 <p class="text-slate-400 text-xs md:text-base max-w-xl mx-auto">Temukan tema impian Anda di sini.</p>
-                <!-- Admin Badge (Hidden by default) -->
-                <div id="admin-badge" class="hidden mt-4">
+                <div id="admin-badge" class="hidden mt-4 flex justify-center items-center gap-2">
                     <span class="px-3 py-1 bg-green-500/20 text-green-400 border border-green-500/50 rounded-full text-xs font-bold uppercase tracking-wider">
                         <i class="fas fa-user-shield mr-1"></i> Mode Admin Aktif
                     </span>
                 </div>
             </div>
 
-            <!-- Filter Dropdown -->
             <div class="max-w-[200px] mx-auto mb-8 relative z-20" data-aos="fade-up" data-aos-delay="100">
                 <div class="relative">
                     <select id="category-filter" onchange="filterCatalog()" class="block w-full pl-4 pr-10 py-2.5 text-sm border border-white/10 rounded-2xl bg-[#0f172a]/80 text-white focus:outline-none focus:border-cyan-500 transition-all cursor-pointer shadow-lg backdrop-blur-sm text-center appearance-none hover:border-cyan-500/50">
@@ -319,12 +229,11 @@
                 </div>
             </div>
 
-            <!-- DYNAMIC CATALOG GRID -->
             <div id="catalog-grid" class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 min-h-[400px]">
-                <!-- Item-item akan di-generate oleh JavaScript -->
+                <!-- Loading State (will be replaced) -->
+                <div class="col-span-full text-center py-10 text-slate-500 animate-pulse">Memuat data...</div>
             </div>
 
-            <!-- Empty State -->
             <div id="empty-state" class="hidden py-8 text-center">
                 <div class="text-4xl mb-2">🔍</div>
                 <p class="text-slate-400 text-sm">Kategori belum tersedia.</p>
@@ -341,23 +250,17 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 <div class="p-8 rounded-2xl bg-white/5 border border-white/5 text-center hover:bg-white/10 transition-colors group hover:border-cyan-400/50" data-aos="fade-up">
-                    <div class="w-16 h-16 bg-cyan-400/10 text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl group-hover:scale-110 transition-transform">
-                        <i class="fas fa-gem"></i>
-                    </div>
+                    <div class="w-16 h-16 bg-cyan-400/10 text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl group-hover:scale-110 transition-transform"><i class="fas fa-gem"></i></div>
                     <h3 class="text-xl font-bold text-white mb-3">Desain Premium</h3>
                     <p class="text-slate-400 text-sm leading-relaxed">Estetika tinggi untuk momen spesial.</p>
                 </div>
                 <div class="p-8 rounded-2xl bg-white/5 border border-white/5 text-center hover:bg-white/10 transition-colors group hover:border-cyan-400/50" data-aos="fade-up" data-aos-delay="100">
-                    <div class="w-16 h-16 bg-cyan-400/10 text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl group-hover:scale-110 transition-transform">
-                        <i class="fas fa-bolt"></i>
-                    </div>
+                    <div class="w-16 h-16 bg-cyan-400/10 text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl group-hover:scale-110 transition-transform"><i class="fas fa-bolt"></i></div>
                     <h3 class="text-xl font-bold text-white mb-3">Proses Cepat</h3>
                     <p class="text-slate-400 text-sm leading-relaxed">Siap disebar dalam waktu singkat.</p>
                 </div>
                 <div class="p-8 rounded-2xl bg-white/5 border border-white/5 text-center hover:bg-white/10 transition-colors group hover:border-cyan-400/50" data-aos="fade-up" data-aos-delay="200">
-                    <div class="w-16 h-16 bg-cyan-400/10 text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl group-hover:scale-110 transition-transform">
-                        <i class="fas fa-infinity"></i>
-                    </div>
+                    <div class="w-16 h-16 bg-cyan-400/10 text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl group-hover:scale-110 transition-transform"><i class="fas fa-infinity"></i></div>
                     <h3 class="text-xl font-bold text-white mb-3">Revisi Tanpa Batas</h3>
                     <p class="text-slate-400 text-sm leading-relaxed">Garansi revisi data hingga sesuai.</p>
                 </div>
@@ -372,10 +275,8 @@
                 <h2 class="text-2xl font-heading font-bold mb-2 text-white">FAQ</h2>
                 <div class="w-10 h-0.5 bg-cyan-500 mx-auto rounded-full"></div>
             </div>
-            
-            <!-- Dynamic FAQ Container -->
             <div id="faq-list" class="space-y-3" data-aos="fade-up">
-                <!-- FAQs will be loaded here -->
+                <div class="text-center text-slate-500 text-sm">Memuat FAQ...</div>
             </div>
         </div>
     </section>
@@ -409,14 +310,12 @@
         <div class="bg-[#0f172a] p-8 rounded-2xl border border-white/10 w-full max-w-xs relative text-center shadow-2xl">
             <button onclick="toggleAdminModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
             <h3 class="text-xl font-bold text-white mb-6 font-heading">Admin Login</h3>
-            
             <div class="relative w-full mb-4">
                 <input type="password" id="admin-pass-input" placeholder="Masukkan Password" class="w-full px-4 py-2 pr-10 bg-black/50 border border-white/10 rounded-lg text-white focus:outline-none focus:border-cyan-500">
                 <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-2.5 text-slate-400 hover:text-white focus:outline-none">
                     <i id="eye-icon" class="fas fa-eye"></i>
                 </button>
             </div>
-
             <button onclick="checkAdminLogin()" class="w-full py-2 bg-gradient-to-r from-cyan-600 to-sky-500 text-white font-bold rounded-lg hover:shadow-[0_0_15px_rgba(34,211,238,0.4)] transition-all">MASUK</button>
         </div>
     </div>
@@ -493,10 +392,25 @@
 
     <!-- Scripts -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-    <script>
-        AOS.init({ duration: 600, once: true, offset: 30 });
+    
+    <!-- FIREBASE MODULE SCRIPT -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // --- DATA & STATE MANAGEMENT ---
+        // --- GANTI BAGIAN INI DENGAN CONFIG FIREBASE KAKAK ---
+        const firebaseConfig = {
+  apiKey: "AIzaSyBoNAKRutDNTT7QjBH1NzHU5sXX31bxjXM",
+  authDomain: "katalog-82fbf.firebaseapp.com",
+  projectId: "katalog-82fbf",
+  storageBucket: "katalog-82fbf.firebasestorage.app",
+  messagingSenderId: "410997646826",
+  appId: "1:410997646826:web:8d292ce5afb4955f2bbe93",
+  measurementId: "G-220BRVP5H5"
+        };
+        // -----------------------------------------------------
+
+        // INITIAL DATA BACKUP
         const initialData = [
             { id: 1, title: "Blue Elegant", category: "pernikahan", image: "blue1.jpg", link: "https://wedding12.pages.dev/", tag: "Premium" },
             { id: 2, title: "Sage Garden", category: "pernikahan", image: "black golden.jpg", link: "https://wedding8mf.pages.dev/", tag: "Best Seller" },
@@ -520,62 +434,201 @@
             { id: 20, title: "Space Rocket", category: "khitanan", image: "space-rocket.jpg", link: "https://undangan-digital-9jj.pages.dev/", tag: "" },
         ];
 
-        const initialFaqData = [
-            { id: 1, q: "Berapa lama prosesnya?", a: "Normalnya 1x24 jam. Kilat bisa 3-6 jam (ada biaya tambahan)." },
-            { id: 2, q: "Bisa revisi data?", a: "Ya, revisi data (nama, tempat, waktu) gratis sepuasnya sampai hari H acara." }
-        ];
+        let app, db;
+        let isFirebaseReady = false;
 
-        let catalogData = [];
-        let faqData = [];
-        let isAdmin = false;
-        const ADMIN_PASS = "malikfaza99";
-        let tempImageBase64 = "";
-
-        // Load Data from LocalStorage
-        function loadData() {
-            // Load Catalog
-            const storedCatalog = localStorage.getItem('mf_catalog_data');
-            if (storedCatalog) {
-                catalogData = JSON.parse(storedCatalog);
+        try {
+            if (firebaseConfig.apiKey !== "API_KEY_KAMU") {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                isFirebaseReady = true;
             } else {
-                catalogData = initialData; 
-                saveData(); 
+                console.warn("Firebase Config belum diisi!");
             }
-            renderCatalog();
-
-            // Load FAQ
-            const storedFaq = localStorage.getItem('mf_faq_data');
-            if (storedFaq) {
-                faqData = JSON.parse(storedFaq);
-            } else {
-                faqData = initialFaqData;
-                saveFaqData();
-            }
-            renderFaq();
+        } catch(e) {
+            console.error("Firebase Error:", e);
         }
 
-        // Save Data to LocalStorage
-        function saveData() {
+        // --- BATCH UPLOAD FUNCTION ---
+        window.uploadInitialData = async function() {
+            if (!isFirebaseReady) return Swal.fire('Error', 'Firebase belum siap', 'error');
+            
+            Swal.fire({
+                title: 'Upload Data Bawaan?',
+                text: "Ini akan menambahkan 20 item data bawaan ke database online Anda.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Upload',
+                cancelButtonText: 'Batal'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    Swal.showLoading();
+                    const batch = writeBatch(db);
+                    
+                    initialData.forEach((item) => {
+                        const docRef = doc(collection(db, "catalogs")); // Auto ID
+                        // Remove numeric ID, let Firestore generate one
+                        const { id, ...data } = item; 
+                        batch.set(docRef, { ...data, createdAt: new Date() });
+                    });
+
+                    try {
+                        await batch.commit();
+                        Swal.fire('Sukses', 'Data bawaan berhasil diupload ke database!', 'success');
+                    } catch(e) {
+                        console.error(e);
+                        Swal.fire('Gagal', 'Terjadi kesalahan saat upload.', 'error');
+                    }
+                }
+            });
+        }
+
+        // Expose functions globally
+        window.saveItem = async function() {
+            if (!isFirebaseReady) return Swal.fire('Error', 'Firebase belum dikonfigurasi!', 'error');
+
+            const id = document.getElementById('item-id').value;
+            const title = document.getElementById('item-title').value;
+            const category = document.getElementById('item-category').value;
+            const link = document.getElementById('item-link').value;
+            const tag = document.getElementById('item-tag').value;
+            const image = window.tempImageBase64;
+
+            if (!title || !link || !image) {
+                Swal.fire({ icon: 'warning', text: 'Mohon lengkapi data (Judul, Link, Foto)' });
+                return;
+            }
+
+            Swal.showLoading();
+
             try {
-                localStorage.setItem('mf_catalog_data', JSON.stringify(catalogData));
+                if (id) {
+                    await updateDoc(doc(db, "catalogs", id), {
+                        title, category, link, tag, image, updatedAt: new Date()
+                    });
+                } else {
+                    await addDoc(collection(db, "catalogs"), {
+                        title, category, link, tag, image, createdAt: new Date()
+                    });
+                }
+                closeFormModal();
+                Swal.fire({ icon: 'success', title: 'Berhasil', showConfirmButton: false, timer: 1000 });
             } catch (e) {
-                Swal.fire({ icon: 'error', title: 'Penyimpanan Penuh', text: 'Gambar terlalu besar, gunakan gambar yang lebih kecil.' });
+                console.error(e);
+                Swal.fire('Error', 'Gagal menyimpan data.', 'error');
+            }
+        };
+
+        window.deleteItem = async function(id) {
+            if (!isFirebaseReady) return;
+             Swal.fire({
+                title: 'Hapus desain ini?', text: "Data tidak bisa dikembalikan!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, hapus!'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    // Check if local dummy id
+                    if (typeof id === 'number') {
+                         Swal.fire('Info', 'Ini data lokal. Silahkan upload ke database dulu untuk mengelola.', 'info');
+                         return;
+                    }
+                    await deleteDoc(doc(db, "catalogs", id));
+                    Swal.fire('Terhapus!', 'Desain telah dihapus.', 'success');
+                }
+            });
+        };
+
+        window.saveFaq = async function() {
+            if (!isFirebaseReady) return;
+            const id = document.getElementById('faq-id').value;
+            const q = document.getElementById('faq-question').value;
+            const a = document.getElementById('faq-answer').value;
+
+            if (!q || !a) {
+                Swal.fire({ icon: 'warning', text: 'Mohon isi pertanyaan dan jawaban' });
+                return;
+            }
+
+            Swal.showLoading();
+            try {
+                if (id) {
+                    await updateDoc(doc(db, "faqs", id), { q, a });
+                } else {
+                    await addDoc(collection(db, "faqs"), { q, a, createdAt: new Date() });
+                }
+                closeFaqModal();
+                Swal.fire({ icon: 'success', title: 'FAQ Disimpan', showConfirmButton: false, timer: 1000 });
+            } catch(e) {
+                 Swal.fire('Error', 'Gagal menyimpan FAQ.', 'error');
             }
         }
 
-        function saveFaqData() {
-            localStorage.setItem('mf_faq_data', JSON.stringify(faqData));
+        window.deleteFaq = async function(id) {
+            if (!isFirebaseReady) return;
+            Swal.fire({
+                title: 'Hapus FAQ ini?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, hapus!'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    await deleteDoc(doc(db, "faqs", id));
+                    Swal.fire('Terhapus!', 'FAQ telah dihapus.', 'success');
+                }
+            });
         }
 
-        // --- RENDER CATALOG ---
-        function renderCatalog() {
+        // Realtime Listeners
+        if (isFirebaseReady) {
+            onSnapshot(collection(db, "catalogs"), (snapshot) => {
+                if (snapshot.empty) {
+                    // FALLBACK: Show Local Initial Data if DB is empty
+                    window.catalogData = initialData;
+                    window.isUsingLocalData = true;
+                } else {
+                    const data = [];
+                    snapshot.forEach((doc) => {
+                        data.push({ id: doc.id, ...doc.data() });
+                    });
+                    window.catalogData = data; 
+                    window.isUsingLocalData = false;
+                }
+                window.renderCatalog();
+                window.updateAdminUI(); // Update UI to show/hide upload button
+            });
+
+            onSnapshot(collection(db, "faqs"), (snapshot) => {
+                const data = [];
+                snapshot.forEach((doc) => {
+                    data.push({ id: doc.id, ...doc.data() });
+                });
+                window.faqData = data;
+                window.renderFaq();
+            });
+        } else {
+             // If firebase not ready, show initial data
+             window.catalogData = initialData;
+             window.renderCatalog();
+        }
+
+    </script>
+
+    <!-- Main Logic Script (UI) -->
+    <script>
+        AOS.init({ duration: 600, once: true, offset: 30 });
+
+        // Global Variables
+        window.catalogData = [];
+        window.faqData = [];
+        window.isAdmin = false;
+        window.isUsingLocalData = false;
+        window.tempImageBase64 = "";
+        const ADMIN_PASS = "malikfaza99";
+
+        // --- RENDER FUNCTIONS ---
+        window.renderCatalog = function() {
             const grid = document.getElementById('catalog-grid');
             const filter = document.getElementById('category-filter').value;
             grid.innerHTML = '';
             
             let hasItem = false;
 
-            catalogData.forEach(item => {
+            window.catalogData.forEach(item => {
                 if (filter !== 'all' && item.category !== filter) return;
                 hasItem = true;
 
@@ -585,10 +638,13 @@
                 
                 const tagHtml = item.tag ? `<div class="absolute top-2 left-2 z-20"><span class="px-2 py-0.5 bg-cyan-600/90 backdrop-blur-sm text-white text-[9px] font-bold rounded-lg uppercase tracking-wider shadow-lg">${item.tag}</span></div>` : '';
                 
-                const adminControls = isAdmin ? `
+                // Quote ID properly
+                const idParam = typeof item.id === 'string' ? `'${item.id}'` : item.id;
+
+                const adminControls = window.isAdmin ? `
                     <div class="absolute top-2 right-2 z-30 flex gap-2">
-                        <button onclick="editItem(${item.id})" class="w-6 h-6 bg-yellow-500 rounded-full text-white text-[10px] flex items-center justify-center hover:bg-yellow-600 shadow-lg"><i class="fas fa-edit"></i></button>
-                        <button onclick="deleteItem(${item.id})" class="w-6 h-6 bg-red-500 rounded-full text-white text-[10px] flex items-center justify-center hover:bg-red-600 shadow-lg"><i class="fas fa-trash"></i></button>
+                        <button onclick="editItem(${idParam})" class="w-6 h-6 bg-yellow-500 rounded-full text-white text-[10px] flex items-center justify-center hover:bg-yellow-600 shadow-lg"><i class="fas fa-edit"></i></button>
+                        <button onclick="deleteItem(${idParam})" class="w-6 h-6 bg-red-500 rounded-full text-white text-[10px] flex items-center justify-center hover:bg-red-600 shadow-lg"><i class="fas fa-trash"></i></button>
                     </div>
                 ` : '';
 
@@ -610,23 +666,27 @@
                 `;
                 grid.appendChild(card);
             });
-
             document.getElementById('empty-state').classList.toggle('hidden', hasItem);
         }
 
-        // --- RENDER FAQ ---
-        function renderFaq() {
+        window.renderFaq = function() {
             const container = document.getElementById('faq-list');
             container.innerHTML = '';
             
-            faqData.forEach(item => {
+            // Fallback content if empty
+            if(window.faqData.length === 0) {
+                container.innerHTML = `<div class="text-center text-slate-500 text-xs">Belum ada FAQ.</div>`;
+                return;
+            }
+
+            window.faqData.forEach(item => {
                 const details = document.createElement('details');
                 details.className = "group bg-[#0f172a]/60 border border-white/5 rounded-2xl open:bg-[#0f172a]/80 transition-all duration-300 relative";
                 
-                const adminControls = isAdmin ? `
+                const adminControls = window.isAdmin ? `
                     <div class="absolute right-12 top-4 flex gap-2 z-20">
-                         <button onclick="editFaq(${item.id})" class="text-yellow-500 hover:text-yellow-400 text-xs"><i class="fas fa-edit"></i></button>
-                         <button onclick="deleteFaq(${item.id})" class="text-red-500 hover:text-red-400 text-xs"><i class="fas fa-trash"></i></button>
+                         <button onclick="editFaq('${item.id}')" class="text-yellow-500 hover:text-yellow-400 text-xs"><i class="fas fa-edit"></i></button>
+                         <button onclick="deleteFaq('${item.id}')" class="text-red-500 hover:text-red-400 text-xs"><i class="fas fa-trash"></i></button>
                     </div>
                 ` : '';
 
@@ -644,15 +704,12 @@
             });
         }
 
-        function filterCatalog() { renderCatalog(); }
+        window.filterCatalog = function() { window.renderCatalog(); }
 
         // --- ADMIN AUTH ---
-        function toggleAdminModal() {
-            document.getElementById('login-modal').classList.toggle('hidden');
-        }
+        window.toggleAdminModal = function() { document.getElementById('login-modal').classList.toggle('hidden'); }
 
-        // Toggle Password Visibility
-        function togglePasswordVisibility() {
+        window.togglePasswordVisibility = function() {
             const input = document.getElementById('admin-pass-input');
             const icon = document.getElementById('eye-icon');
             if (input.type === 'password') {
@@ -666,18 +723,15 @@
             }
         }
 
-        // Enter Key to Login
         document.getElementById('admin-pass-input').addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') {
-                checkAdminLogin();
-            }
+            if (e.key === 'Enter') checkAdminLogin();
         });
 
-        function checkAdminLogin() {
+        window.checkAdminLogin = function() {
             const pass = document.getElementById('admin-pass-input').value;
             if (pass === ADMIN_PASS) {
-                isAdmin = true;
-                updateAdminUI();
+                window.isAdmin = true;
+                window.updateAdminUI();
                 toggleAdminModal();
                 Swal.fire({ icon: 'success', title: 'Login Berhasil', text: 'Mode Admin Aktif', timer: 1500, showConfirmButton: false });
             } else {
@@ -685,43 +739,51 @@
             }
         }
 
-        function adminLogout() {
-            isAdmin = false;
-            updateAdminUI();
+        window.adminLogout = function() {
+            window.isAdmin = false;
+            window.updateAdminUI();
             Swal.fire({ icon: 'success', title: 'Logout', text: 'Kembali ke mode pengunjung', timer: 1500, showConfirmButton: false });
         }
 
-        function updateAdminUI() {
+        window.updateAdminUI = function() {
             const loginBtn = document.getElementById('admin-login-btn');
             const logoutBtn = document.getElementById('admin-logout-btn');
             const addBtn = document.getElementById('add-item-btn');
             const badge = document.getElementById('admin-badge');
             const addFaqBtn = document.getElementById('add-faq-btn');
+            const restoreBtn = document.getElementById('restore-data-btn');
 
-            if (isAdmin) {
+            if (window.isAdmin) {
                 loginBtn.classList.add('hidden');
                 logoutBtn.classList.remove('hidden');
                 addBtn.classList.remove('hidden');
                 addFaqBtn.classList.remove('hidden');
                 badge.classList.remove('hidden');
+                
+                // Only show restore button if using local data (DB is empty)
+                if (window.isUsingLocalData) {
+                    restoreBtn.classList.remove('hidden');
+                } else {
+                    restoreBtn.classList.add('hidden');
+                }
+
             } else {
                 loginBtn.classList.remove('hidden');
                 logoutBtn.classList.add('hidden');
                 addBtn.classList.add('hidden');
                 addFaqBtn.classList.add('hidden');
                 badge.classList.add('hidden');
+                restoreBtn.classList.add('hidden');
             }
-            renderCatalog(); 
-            renderFaq();
+            window.renderCatalog(); 
+            window.renderFaq();
         }
 
-        // --- CATALOG CRUD ---
-
-        function openFormModal(isEdit = false, id = null) {
+        // --- CATALOG FORM ---
+        window.openFormModal = function(isEdit = false, id = null) {
             const modal = document.getElementById('form-modal');
             const title = document.getElementById('form-title');
             
-            // Reset Form
             document.getElementById('item-id').value = '';
             document.getElementById('item-title').value = '';
             document.getElementById('item-category').value = 'pernikahan';
@@ -730,11 +792,17 @@
             document.getElementById('item-image-file').value = '';
             document.getElementById('image-preview').classList.add('hidden');
             document.getElementById('upload-placeholder').classList.remove('hidden');
-            tempImageBase64 = "";
+            window.tempImageBase64 = "";
 
             if (isEdit && id) {
+                // Prevent edit if ID is numeric (local data)
+                if (typeof id === 'number') {
+                    Swal.fire('Info', 'Data ini adalah preview lokal. Silahkan "Upload Data Bawaan" terlebih dahulu di menu Admin untuk mengeditnya.', 'info');
+                    return;
+                }
+
                 title.innerText = "Edit Desain";
-                const item = catalogData.find(d => d.id === id);
+                const item = window.catalogData.find(d => d.id === id);
                 if (item) {
                     document.getElementById('item-id').value = item.id;
                     document.getElementById('item-title').value = item.title;
@@ -742,7 +810,7 @@
                     document.getElementById('item-link').value = item.link;
                     document.getElementById('item-tag').value = item.tag;
                     
-                    tempImageBase64 = item.image;
+                    window.tempImageBase64 = item.image;
                     const preview = document.getElementById('image-preview');
                     preview.src = item.image;
                     preview.classList.remove('hidden');
@@ -752,97 +820,14 @@
                 title.innerText = "Tambah Desain Baru";
             }
             modal.classList.remove('hidden');
-            // Focus on upload area to enable paste
             document.getElementById('upload-area').focus();
         }
 
-        function closeFormModal() { document.getElementById('form-modal').classList.add('hidden'); }
+        window.closeFormModal = function() { document.getElementById('form-modal').classList.add('hidden'); }
+        window.editItem = function(id) { openFormModal(true, id); }
 
-        // --- IMAGE HANDLING (FILE & PASTE) ---
-        function previewImage(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    setImagePreview(e.target.result);
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
-
-        function setImagePreview(base64) {
-            const preview = document.getElementById('image-preview');
-            preview.src = base64;
-            preview.classList.remove('hidden');
-            document.getElementById('upload-placeholder').classList.add('hidden');
-            tempImageBase64 = base64;
-        }
-
-        // Listen for Paste Event globally, but only process if form modal is open
-        document.addEventListener('paste', function(event) {
-            const formModal = document.getElementById('form-modal');
-            if (formModal.classList.contains('hidden')) return;
-
-            const items = (event.clipboardData || event.originalEvent.clipboardData).items;
-            for (let index in items) {
-                const item = items[index];
-                if (item.kind === 'file' && item.type.startsWith('image/')) {
-                    const blob = item.getAsFile();
-                    const reader = new FileReader();
-                    reader.onload = function(e){
-                        setImagePreview(e.target.result);
-                        Swal.fire({ icon: 'success', title: 'Gambar ditempel!', toast: true, position: 'top-end', showConfirmButton: false, timer: 1500 });
-                    };
-                    reader.readAsDataURL(blob);
-                }
-            }
-        });
-
-
-        function saveItem() {
-            const id = document.getElementById('item-id').value;
-            const title = document.getElementById('item-title').value;
-            const category = document.getElementById('item-category').value;
-            const link = document.getElementById('item-link').value;
-            const tag = document.getElementById('item-tag').value;
-
-            if (!title || !link || !tempImageBase64) {
-                Swal.fire({ icon: 'warning', text: 'Mohon lengkapi data (Judul, Link, Foto)' });
-                return;
-            }
-
-            if (id) {
-                const index = catalogData.findIndex(item => item.id == id);
-                if (index !== -1) catalogData[index] = { ...catalogData[index], title, category, link, tag, image: tempImageBase64 };
-            } else {
-                const newId = catalogData.length > 0 ? Math.max(...catalogData.map(i => i.id)) + 1 : 1;
-                catalogData.unshift({ id: newId, title, category, link, tag, image: tempImageBase64 });
-            }
-
-            saveData();
-            renderCatalog();
-            closeFormModal();
-            Swal.fire({ icon: 'success', title: 'Berhasil', showConfirmButton: false, timer: 1000 });
-        }
-
-        function deleteItem(id) {
-            Swal.fire({
-                title: 'Hapus desain ini?', text: "Data tidak bisa dikembalikan!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, hapus!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    catalogData = catalogData.filter(item => item.id !== id);
-                    saveData();
-                    renderCatalog();
-                    Swal.fire('Terhapus!', 'Desain telah dihapus.', 'success');
-                }
-            });
-        }
-
-        function editItem(id) { openFormModal(true, id); }
-
-
-        // --- FAQ CRUD ---
-
-        function openFaqModal(isEdit = false, id = null) {
+        // --- FAQ FORM ---
+        window.openFaqModal = function(isEdit = false, id = null) {
             const modal = document.getElementById('faq-modal');
             const title = document.getElementById('faq-modal-title');
             
@@ -852,7 +837,7 @@
 
             if (isEdit && id) {
                 title.innerText = "Edit FAQ";
-                const item = faqData.find(f => f.id === id);
+                const item = window.faqData.find(f => f.id === id);
                 if (item) {
                     document.getElementById('faq-id').value = item.id;
                     document.getElementById('faq-question').value = item.q;
@@ -864,49 +849,58 @@
             modal.classList.remove('hidden');
         }
 
-        function closeFaqModal() { document.getElementById('faq-modal').classList.add('hidden'); }
+        window.closeFaqModal = function() { document.getElementById('faq-modal').classList.add('hidden'); }
+        window.editFaq = function(id) { openFaqModal(true, id); }
 
-        function saveFaq() {
-            const id = document.getElementById('faq-id').value;
-            const q = document.getElementById('faq-question').value;
-            const a = document.getElementById('faq-answer').value;
-
-            if (!q || !a) {
-                Swal.fire({ icon: 'warning', text: 'Mohon isi pertanyaan dan jawaban' });
-                return;
+        // --- IMAGE & RESIZE LOGIC ---
+        window.previewImage = function(input) {
+            if (input.files && input.files[0]) {
+                processImage(input.files[0]);
             }
-
-            if (id) {
-                const index = faqData.findIndex(f => f.id == id);
-                if (index !== -1) faqData[index] = { ...faqData[index], q, a };
-            } else {
-                const newId = faqData.length > 0 ? Math.max(...faqData.map(f => f.id)) + 1 : 1;
-                faqData.push({ id: newId, q, a });
-            }
-
-            saveFaqData();
-            renderFaq();
-            closeFaqModal();
-            Swal.fire({ icon: 'success', title: 'FAQ Disimpan', showConfirmButton: false, timer: 1000 });
         }
 
-        function deleteFaq(id) {
-             Swal.fire({
-                title: 'Hapus FAQ ini?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, hapus!'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    faqData = faqData.filter(f => f.id !== id);
-                    saveFaqData();
-                    renderFaq();
-                    Swal.fire('Terhapus!', 'FAQ telah dihapus.', 'success');
+        document.addEventListener('paste', function(event) {
+            const formModal = document.getElementById('form-modal');
+            if (formModal.classList.contains('hidden')) return;
+
+            const items = (event.clipboardData || event.originalEvent.clipboardData).items;
+            for (let index in items) {
+                const item = items[index];
+                if (item.kind === 'file' && item.type.startsWith('image/')) {
+                    processImage(item.getAsFile());
                 }
-            });
+            }
+        });
+
+        function processImage(file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const img = new Image();
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 600; 
+                    const scaleSize = MAX_WIDTH / img.width;
+                    canvas.width = MAX_WIDTH;
+                    canvas.height = img.height * scaleSize;
+
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                    const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+                    
+                    const preview = document.getElementById('image-preview');
+                    preview.src = dataUrl;
+                    preview.classList.remove('hidden');
+                    document.getElementById('upload-placeholder').classList.add('hidden');
+                    window.tempImageBase64 = dataUrl;
+                    Swal.fire({ icon: 'success', title: 'Gambar siap!', toast: true, position: 'top-end', showConfirmButton: false, timer: 1000 });
+                }
+                img.src = event.target.result;
+            }
+            reader.readAsDataURL(file);
         }
 
-        function editFaq(id) { openFaqModal(true, id); }
-
-
-        // --- COVER & MUSIC LOGIC ---
+        // --- COVER & MUSIC ---
         const coverScreen = document.getElementById('cover-screen');
         const audio = document.getElementById('bg-audio');
         const musicBtn = document.getElementById('music-btn');
@@ -914,12 +908,11 @@
         const musicIcon = musicBtn.querySelector('i');
         let isPlaying = false;
 
-        function openCatalog() {
+        window.openCatalog = function() {
             audio.play().then(() => {
                 isPlaying = true;
                 musicBtn.classList.add('music-rotating');
             }).catch(error => {
-                console.log("Autoplay prevented:", error);
                 isPlaying = false;
                 musicIcon.classList.remove('fa-music');
                 musicIcon.classList.add('fa-volume-mute');
@@ -931,7 +924,7 @@
             document.body.style.overflow = 'auto';
         }
 
-        function toggleMusic() {
+        window.toggleMusic = function() {
             if (isPlaying) {
                 audio.pause();
                 isPlaying = false;
@@ -947,7 +940,7 @@
             }
         }
 
-        // --- STARS GENERATOR ---
+        // --- ANIMATIONS ---
         const starsContainer = document.getElementById('stars-container');
         for (let i = 0; i < 50; i++) {
             const star = document.createElement('div');
@@ -962,11 +955,9 @@
             starsContainer.appendChild(star);
         }
 
-        // --- PARTICLE SYSTEM ---
         const canvas = document.getElementById('canvas-bg');
         const ctx = canvas.getContext('2d');
         let width, height, particles = [];
-        
         function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
         
         class Particle {
@@ -987,7 +978,6 @@
                 ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
             }
         }
-        
         function initParticles() { particles = []; for(let i=0; i<80; i++) particles.push(new Particle()); }
         function animateParticles() {
             ctx.clearRect(0, 0, width, height);
@@ -1003,12 +993,8 @@
             });
             requestAnimationFrame(animateParticles);
         }
-        
         window.addEventListener('resize', resize); resize(); initParticles(); animateParticles();
-
-        function toggleMobileMenu() { document.getElementById('mobile-menu').classList.toggle('hidden'); }
-
-        window.onload = loadData;
+        window.toggleMobileMenu = function() { document.getElementById('mobile-menu').classList.toggle('hidden'); }
 
     </script>
 </body>
