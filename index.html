@@ -108,9 +108,14 @@
         <i class="fas fa-question text-lg"></i>
     </button>
 
-    <!-- Restore Data Button (Hidden by default, shown if needed) -->
+    <!-- Restore Data Button -->
     <button id="restore-data-btn" onclick="uploadInitialData()" class="fixed top-24 right-6 z-[60] px-4 py-2 bg-yellow-600/80 backdrop-blur-md border border-yellow-400 rounded-full text-white text-xs hover:bg-yellow-500 transition-all duration-300 shadow-lg hidden">
         <i class="fas fa-cloud-upload-alt mr-2"></i> Upload Data Bawaan
+    </button>
+
+    <!-- Reset Data Button (New) -->
+    <button id="reset-data-btn" onclick="resetDatabase()" class="fixed top-36 right-6 z-[60] px-4 py-2 bg-red-600/80 backdrop-blur-md border border-red-400 rounded-full text-white text-xs hover:bg-red-500 transition-all duration-300 shadow-lg hidden">
+        <i class="fas fa-bomb mr-2"></i> Hapus Semua Data
     </button>
 
     <!-- === COVER SCREEN === -->
@@ -410,7 +415,7 @@
         };
         // -----------------------------------------------------
 
-        // INITIAL DATA BACKUP
+        // INITIAL DATA BACKUP (CATALOG)
         const initialData = [
             { id: 1, title: "Blue Elegant", category: "pernikahan", image: "blue1.jpg", link: "https://wedding12.pages.dev/", tag: "Premium" },
             { id: 2, title: "Sage Garden", category: "pernikahan", image: "black golden.jpg", link: "https://wedding8mf.pages.dev/", tag: "Best Seller" },
@@ -434,6 +439,12 @@
             { id: 20, title: "Space Rocket", category: "khitanan", image: "space-rocket.jpg", link: "https://undangan-digital-9jj.pages.dev/", tag: "" },
         ];
 
+        // INITIAL DATA BACKUP (FAQ)
+        const initialFaqData = [
+            { id: 1, q: "Berapa lama prosesnya?", a: "Normalnya 1x24 jam. Kilat bisa 3-6 jam (ada biaya tambahan)." },
+            { id: 2, q: "Bisa revisi data?", a: "Ya, revisi data (nama, tempat, waktu) gratis sepuasnya sampai hari H acara." }
+        ];
+
         let app, db;
         let isFirebaseReady = false;
 
@@ -449,13 +460,53 @@
             console.error("Firebase Error:", e);
         }
 
+        // --- RESET DATABASE (DELETE ALL) ---
+        window.resetDatabase = async function() {
+            if (!isFirebaseReady) return Swal.fire('Error', 'Firebase belum siap', 'error');
+            
+            Swal.fire({
+                title: 'Hapus SEMUA Data?',
+                text: "PERINGATAN: Semua katalog dan FAQ di database akan dihapus permanen! Database akan menjadi kosong (0).",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Ya, Hapus Semua!',
+                cancelButtonText: 'Batal'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    Swal.showLoading();
+                    try {
+                        const batch = writeBatch(db);
+                        
+                        // Get all Catalogs
+                        const catSnapshot = await getDocs(collection(db, "catalogs"));
+                        catSnapshot.forEach((doc) => {
+                            batch.delete(doc.ref);
+                        });
+                        
+                        // Get all FAQs
+                        const faqSnapshot = await getDocs(collection(db, "faqs"));
+                        faqSnapshot.forEach((doc) => {
+                            batch.delete(doc.ref);
+                        });
+
+                        await batch.commit();
+                        Swal.fire('Terhapus', 'Database telah dikosongkan.', 'success');
+                    } catch (e) {
+                        console.error(e);
+                        Swal.fire('Error', 'Gagal menghapus data: ' + e.message, 'error');
+                    }
+                }
+            });
+        }
+
         // --- BATCH UPLOAD FUNCTION ---
         window.uploadInitialData = async function() {
             if (!isFirebaseReady) return Swal.fire('Error', 'Firebase belum siap', 'error');
             
             Swal.fire({
                 title: 'Upload Data Bawaan?',
-                text: "Ini akan menambahkan 20 item data bawaan ke database online Anda.",
+                text: "Ini akan menambahkan 20 item katalog DAN FAQ bawaan ke database online Anda.",
                 icon: 'question',
                 showCancelButton: true,
                 confirmButtonText: 'Ya, Upload',
@@ -465,10 +516,17 @@
                     Swal.showLoading();
                     const batch = writeBatch(db);
                     
+                    // Upload Catalog
                     initialData.forEach((item) => {
-                        const docRef = doc(collection(db, "catalogs")); // Auto ID
-                        // Remove numeric ID, let Firestore generate one
+                        const docRef = doc(collection(db, "catalogs")); 
                         const { id, ...data } = item; 
+                        batch.set(docRef, { ...data, createdAt: new Date() });
+                    });
+
+                    // Upload FAQ
+                    initialFaqData.forEach((item) => {
+                        const docRef = doc(collection(db, "faqs"));
+                        const { id, ...data } = item;
                         batch.set(docRef, { ...data, createdAt: new Date() });
                     });
 
@@ -525,7 +583,6 @@
                 title: 'Hapus desain ini?', text: "Data tidak bisa dikembalikan!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, hapus!'
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                    // Check if local dummy id
                     if (typeof id === 'number') {
                          Swal.fire('Info', 'Ini data lokal. Silahkan upload ke database dulu untuk mengelola.', 'info');
                          return;
@@ -567,6 +624,10 @@
                 title: 'Hapus FAQ ini?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, hapus!'
             }).then(async (result) => {
                 if (result.isConfirmed) {
+                    if (typeof id === 'number') {
+                         Swal.fire('Info', 'Ini data lokal. Silahkan upload ke database dulu untuk mengelola.', 'info');
+                         return;
+                    }
                     await deleteDoc(doc(db, "faqs", id));
                     Swal.fire('Terhapus!', 'FAQ telah dihapus.', 'success');
                 }
@@ -575,9 +636,9 @@
 
         // Realtime Listeners
         if (isFirebaseReady) {
+            // Listen Catalog
             onSnapshot(collection(db, "catalogs"), (snapshot) => {
                 if (snapshot.empty) {
-                    // FALLBACK: Show Local Initial Data if DB is empty
                     window.catalogData = initialData;
                     window.isUsingLocalData = true;
                 } else {
@@ -589,21 +650,28 @@
                     window.isUsingLocalData = false;
                 }
                 window.renderCatalog();
-                window.updateAdminUI(); // Update UI to show/hide upload button
+                window.updateAdminUI(); 
             });
 
+            // Listen FAQ
             onSnapshot(collection(db, "faqs"), (snapshot) => {
-                const data = [];
-                snapshot.forEach((doc) => {
-                    data.push({ id: doc.id, ...doc.data() });
-                });
-                window.faqData = data;
+                if (snapshot.empty) {
+                    window.faqData = initialFaqData;
+                } else {
+                    const data = [];
+                    snapshot.forEach((doc) => {
+                        data.push({ id: doc.id, ...doc.data() });
+                    });
+                    window.faqData = data;
+                }
                 window.renderFaq();
             });
         } else {
-             // If firebase not ready, show initial data
+             // Fallback
              window.catalogData = initialData;
+             window.faqData = initialFaqData;
              window.renderCatalog();
+             window.renderFaq();
         }
 
     </script>
@@ -752,6 +820,7 @@
             const badge = document.getElementById('admin-badge');
             const addFaqBtn = document.getElementById('add-faq-btn');
             const restoreBtn = document.getElementById('restore-data-btn');
+            const resetBtn = document.getElementById('reset-data-btn');
 
             if (window.isAdmin) {
                 loginBtn.classList.add('hidden');
@@ -760,12 +829,9 @@
                 addFaqBtn.classList.remove('hidden');
                 badge.classList.remove('hidden');
                 
-                // Only show restore button if using local data (DB is empty)
-                if (window.isUsingLocalData) {
-                    restoreBtn.classList.remove('hidden');
-                } else {
-                    restoreBtn.classList.add('hidden');
-                }
+                // Show admin tools unconditionally
+                restoreBtn.classList.remove('hidden');
+                resetBtn.classList.remove('hidden');
 
             } else {
                 loginBtn.classList.remove('hidden');
@@ -774,6 +840,7 @@
                 addFaqBtn.classList.add('hidden');
                 badge.classList.add('hidden');
                 restoreBtn.classList.add('hidden');
+                resetBtn.classList.add('hidden');
             }
             window.renderCatalog(); 
             window.renderFaq();
