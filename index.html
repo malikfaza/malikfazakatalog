@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
+<html lang="id" class="scroll-smooth dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,11 +18,12 @@
     <!-- AOS Animation -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
-    <!-- SweetAlert2 (Untuk Alert Bagus) -->
+    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: {
@@ -41,11 +42,11 @@
                         'pulse-glow': 'pulse-glow 3s infinite',
                         'twinkle': 'twinkle 4s ease-in-out infinite',
                         'spin-slow': 'spin 12s linear infinite',
-                        'spin-music': 'spin 4s linear infinite', // Animasi putar musik
+                        'spin-music': 'spin 3s linear infinite',
                     },
                     keyframes: {
-                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-10px)' } },
-                        'pulse-glow': { '0%, 100%': { opacity: 1, filter: 'brightness(100%)' }, '50%': { opacity: 0.8, filter: 'brightness(130%)' } },
+                        float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-20px)' } },
+                        'pulse-glow': { '0%, 100%': { opacity: 1, filter: 'brightness(100%)' }, '50%': { opacity: 0.7, filter: 'brightness(120%)' } },
                         twinkle: { '0%, 100%': { opacity: 0.3, transform: 'scale(0.8)' }, '50%': { opacity: 1, transform: 'scale(1.2)' } }
                     }
                 }
@@ -54,86 +55,139 @@
     </script>
 
     <style>
-        body { background-color: #020617; color: #e2e8f0; font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; overflow: hidden; }
-        #canvas-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: radial-gradient(circle at center, #0f172a 0%, #020617 80%); }
-        #cover-screen { background: radial-gradient(ellipse at bottom, #1e293b 0%, #020617 100%); transition: transform 1.2s cubic-bezier(0.77, 0, 0.175, 1), opacity 1.2s ease-out; }
-        #cover-screen.slide-up { transform: translateY(-100%); opacity: 0; pointer-events: none; }
-        .star { position: absolute; background: white; border-radius: 50%; animation: twinkle var(--duration) ease-in-out infinite; opacity: var(--opacity); }
+        body { 
+            margin: 0; 
+            overflow-x: hidden;
+            transition: background 0.5s ease, color 0.5s ease;
+        }
+
+        /* --- PERBAIKAN BACKGROUND MODE MALAM/SIANG --- */
+        /* Default (Light Mode) */
+        body {
+            background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);
+            color: #1e293b;
+        }
         
-        /* Class untuk memutar ikon musik */
-        .music-rotating i { animation: spin-music 3s linear infinite; }
+        /* Dark Mode (Target parent .dark) */
+        .dark body {
+            background: #020617; /* Hitam Pekat */
+            color: #e2e8f0;
+        }
+        
+        #canvas-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; transition: opacity 0.5s ease; }
+        
+        /* Cover Screen */
+        #cover-screen { transition: transform 1.0s cubic-bezier(0.77, 0, 0.175, 1), opacity 1.0s ease-out, background 0.5s ease; }
+        #cover-screen.slide-up { transform: translateY(-100%); opacity: 0; pointer-events: none; }
+        
+        .dark #cover-screen { background: radial-gradient(ellipse at bottom, #1e293b 0%, #020617 100%); }
+        html:not(.dark) #cover-screen { background: radial-gradient(ellipse at bottom, #bae6fd 0%, #f0f9ff 100%); }
+
+        .star { position: absolute; background: white; border-radius: 50%; animation: twinkle var(--duration) ease-in-out infinite; opacity: var(--opacity); }
+        html:not(.dark) .star { background: #38bdf8; } 
+
+        .music-rotating i { animation: spin-music 4s linear infinite; }
         @keyframes spin-music { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         ::-webkit-scrollbar { width: 4px; height: 4px; }
-        ::-webkit-scrollbar-track { background: #020617; }
-        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #22d3ee; }
-        .card-hover:hover { transform: translateY(-5px); box-shadow: 0 10px 30px -5px rgba(34, 211, 238, 0.2); border-color: rgba(34, 211, 238, 0.4); }
-        .text-cyan-glow { background: linear-gradient(to right, #22d3ee, #38bdf8, #22d3ee); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-size: 200% auto; text-shadow: 0 0 15px rgba(34, 211, 238, 0.3); animation: shine 4s linear infinite; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+        .dark ::-webkit-scrollbar-track { background: #020617; }
+        .dark ::-webkit-scrollbar-thumb { background: #1e293b; }
+
+        /* Card Styling */
+        .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .card-hover:hover { transform: translateY(-8px); }
+        
+        /* Dark Mode Card */
+        .dark .card-hover:hover { 
+            box-shadow: 0 15px 30px -5px rgba(34, 211, 238, 0.15); 
+            border-color: rgba(34, 211, 238, 0.5); 
+        }
+        /* Light Mode Card */
+        html:not(.dark) .card-hover {
+            background: #ffffff;
+            border: 2px solid #bae6fd; 
+            box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.1);
+        }
+        html:not(.dark) .card-hover:hover {
+            border-color: #0ea5e9; 
+            box-shadow: 0 20px 25px -5px rgba(14, 165, 233, 0.25);
+        }
+
+        .text-cyan-glow {
+            background: linear-gradient(to right, #22d3ee, #38bdf8, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-size: 200% auto;
+            animation: shine 4s linear infinite;
+        }
+        html:not(.dark) .text-cyan-glow {
+            background: linear-gradient(to right, #0284c7, #0ea5e9, #0284c7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
         @keyframes shine { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
-        select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2322d3ee' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; }
+        
+        select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; }
+        .dark select { background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2322d3ee' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); }
+        html:not(.dark) select { background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230284c7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); }
+
         .modal { transition: opacity 0.3s ease, visibility 0.3s ease; }
         .modal.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
         .modal:not(.hidden) { opacity: 1; visibility: visible; pointer-events: auto; }
+        
         details > summary { list-style: none; }
         details > summary::-webkit-details-marker { display: none; }
         details[open] summary ~ * { animation: sweep .3s ease-in-out; }
         @keyframes sweep { 0% {opacity: 0; margin-top: -10px} 100% {opacity: 1; margin-top: 0px} }
     </style>
 </head>
-<body class="antialiased selection:bg-cyan-500 selection:text-white">
+<body class="antialiased selection:bg-cyan-500 selection:text-white transition-colors duration-500">
 
     <!-- AUDIO ELEMENT -->
     <audio id="bg-audio" loop>
         <source src="musik.mp3" type="audio/mpeg">
     </audio>
 
-    <!-- Music Control Button (Kiri Bawah) -->
-    <button id="music-btn" onclick="toggleMusic()" class="fixed bottom-6 left-6 z-[60] w-12 h-12 bg-white/10 backdrop-blur-md border border-cyan-400/30 rounded-full flex items-center justify-center text-cyan-400 hover:bg-cyan-400 hover:text-white transition-all duration-300 hidden shadow-[0_0_20px_rgba(34,211,238,0.3)]">
-        <i class="fas fa-music text-lg"></i>
+    <!-- Music Control Button -->
+    <button id="music-btn" onclick="toggleMusic()" class="fixed bottom-6 left-6 z-[60] w-12 h-12 bg-white/80 dark:bg-white/10 backdrop-blur-md border border-sky-300 dark:border-cyan-400/30 rounded-full flex items-center justify-center text-sky-600 dark:text-cyan-400 hover:scale-110 transition-all duration-300 hidden shadow-lg shadow-sky-500/20 dark:shadow-[0_0_20px_rgba(34,211,238,0.3)]">
+        <i class="fas fa-compact-disc text-2xl"></i>
     </button>
 
-    <!-- Floating Action Buttons (Hanya muncul saat Admin Login) -->
+    <!-- Admin Floating Tools -->
     <div id="admin-tools" class="hidden">
-        <!-- Add Item -->
-        <button onclick="openFormModal()" class="fixed bottom-24 right-6 z-[60] w-12 h-12 bg-green-500/80 backdrop-blur-md border border-green-400 rounded-full flex items-center justify-center text-white hover:bg-green-600 transition-all duration-300 shadow-lg animate-bounce" title="Tambah Desain">
-            <i class="fas fa-plus text-lg"></i>
-        </button>
-        <!-- Add FAQ -->
-        <button onclick="openFaqModal()" class="fixed bottom-40 right-6 z-[60] w-12 h-12 bg-sky-500/80 backdrop-blur-md border border-sky-400 rounded-full flex items-center justify-center text-white hover:bg-sky-600 transition-all duration-300 shadow-lg" title="Tambah FAQ">
-            <i class="fas fa-question text-lg"></i>
-        </button>
-        <!-- Upload Initial Data -->
-        <button id="restore-data-btn" onclick="uploadInitialData()" class="fixed top-24 right-6 z-[60] px-4 py-2 bg-yellow-600/80 backdrop-blur-md border border-yellow-400 rounded-full text-white text-xs hover:bg-yellow-500 transition-all duration-300 shadow-lg">
-            <i class="fas fa-cloud-upload-alt mr-2"></i> Upload Data Bawaan
-        </button>
-        <!-- Reset Data -->
-        <button id="reset-data-btn" onclick="resetDatabase()" class="fixed top-36 right-6 z-[60] px-4 py-2 bg-red-600/80 backdrop-blur-md border border-red-400 rounded-full text-white text-xs hover:bg-red-500 transition-all duration-300 shadow-lg">
-            <i class="fas fa-bomb mr-2"></i> Hapus Semua Data
-        </button>
+        <button onclick="openFormModal()" class="fixed bottom-24 right-6 z-[60] w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-green-600 transition-all animate-bounce border-2 border-white dark:border-transparent" title="Tambah Desain"><i class="fas fa-plus"></i></button>
+        <button onclick="openFaqModal()" class="fixed bottom-40 right-6 z-[60] w-12 h-12 bg-sky-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-sky-600 transition-all border-2 border-white dark:border-transparent" title="Tambah FAQ"><i class="fas fa-question"></i></button>
+        <button id="restore-data-btn" onclick="uploadInitialData()" class="fixed top-24 right-6 z-[60] px-4 py-2 bg-yellow-500 text-white rounded-full text-xs hover:bg-yellow-600 shadow-lg hidden font-bold"><i class="fas fa-cloud-upload-alt mr-2"></i> Upload Data Bawaan</button>
+        <button id="reset-data-btn" onclick="resetDatabase()" class="fixed top-36 right-6 z-[60] px-4 py-2 bg-red-500 text-white rounded-full text-xs hover:bg-red-600 shadow-lg hidden font-bold"><i class="fas fa-bomb mr-2"></i> Hapus Semua Data</button>
     </div>
 
     <!-- === COVER SCREEN === -->
     <section id="cover-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center text-center overflow-hidden">
         <div id="stars-container" class="absolute inset-0 z-0 pointer-events-none"></div>
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-cyan-500/10 rounded-full blur-[100px] animate-pulse-glow"></div>
+        
+        <!-- Blobs Animation (Updated Color for Dark Mode) -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[120px] animate-pulse-glow bg-sky-400/30 dark:bg-cyan-600/20"></div>
+        
         <div class="relative z-10 px-4" data-aos="zoom-in" data-aos-duration="1500">
             <div class="mb-6 inline-block">
-                <i class="fas fa-star text-cyan-300 text-xs animate-twinkle" style="animation-delay: 0s;"></i>
-                <span class="mx-2 text-cyan-300 text-[10px] tracking-[0.4em] uppercase font-bold">Malik Faza Studio</span>
-                <i class="fas fa-star text-cyan-300 text-xs animate-twinkle" style="animation-delay: 1s;"></i>
+                <i class="fas fa-star text-sky-500 dark:text-cyan-300 text-xs animate-twinkle" style="animation-delay: 0s;"></i>
+                <span class="mx-2 text-sky-700 dark:text-cyan-300 text-[10px] tracking-[0.4em] uppercase font-bold">Malik Faza Studio</span>
+                <i class="fas fa-star text-sky-500 dark:text-cyan-300 text-xs animate-twinkle" style="animation-delay: 1s;"></i>
             </div>
-            <h1 class="text-4xl md:text-6xl font-heading font-bold text-white mb-2 tracking-widest leading-tight drop-shadow-lg">
+            <h1 class="text-4xl md:text-6xl font-heading font-bold text-slate-800 dark:text-white mb-2 tracking-widest leading-tight drop-shadow-sm dark:drop-shadow-lg">
                 KATALOG <br>
                 <span class="text-cyan-glow italic font-serif">Exclusive</span>
             </h1>
-            <p class="text-slate-400 text-sm md:text-base font-light mb-10 max-w-md mx-auto leading-relaxed">
+            <p class="text-slate-600 dark:text-slate-400 text-sm md:text-base font-light mb-10 max-w-md mx-auto leading-relaxed">
                 Temukan keindahan dalam setiap detail undangan digital untuk momen spesial Anda.
             </p>
-            <button onclick="openCatalog()" class="group relative px-8 py-3 bg-transparent overflow-hidden rounded-full border border-cyan-500/50 hover:border-cyan-400 transition-all duration-300">
-                <div class="absolute inset-0 w-0 bg-gradient-to-r from-cyan-600 to-sky-500 transition-all duration-[250ms] ease-out group-hover:w-full opacity-10"></div>
-                <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-cyan-600 to-sky-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
-                <span class="relative flex items-center gap-3 text-white font-medium tracking-wider text-sm">
+            <button onclick="openCatalog()" class="group relative px-8 py-3 bg-transparent overflow-hidden rounded-full border-2 border-sky-500 dark:border-cyan-500/50 hover:border-sky-600 dark:hover:border-cyan-400 transition-all duration-300">
+                <div class="absolute inset-0 w-0 bg-gradient-to-r from-sky-500 to-blue-600 dark:from-cyan-600 dark:to-sky-500 transition-all duration-[250ms] ease-out group-hover:w-full opacity-10"></div>
+                <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-sky-500 to-blue-600 dark:from-cyan-600 dark:to-sky-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
+                <span class="relative flex items-center gap-3 text-sky-700 dark:text-white group-hover:text-white font-bold tracking-wider text-sm">
                     <i class="fas fa-book-open"></i> BUKA KATALOG
                 </span>
             </button>
@@ -148,48 +202,53 @@
     <canvas id="canvas-bg"></canvas>
 
     <!-- Navbar -->
-    <nav class="fixed w-full z-50 transition-all duration-300 bg-[#020617]/80 backdrop-blur-md border-b border-white/5" id="navbar">
+    <nav class="fixed w-full z-50 transition-all duration-300 bg-white/90 dark:bg-[#020617]/80 backdrop-blur-md border-b-2 dark:border-b border-sky-100 dark:border-white/5 shadow-sm dark:shadow-none" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 md:h-20">
                 <div class="flex-shrink-0">
-                    <a href="#" class="font-heading text-xl md:text-2xl font-bold tracking-widest text-white hover:text-cyan-300 transition-colors">
+                    <a href="#" class="font-heading text-xl md:text-2xl font-bold tracking-widest text-slate-800 dark:text-white hover:text-sky-500 dark:hover:text-cyan-300 transition-colors">
                         MALIK<span class="text-cyan-glow">FAZA</span>
                     </a>
                 </div>
                 <!-- Desktop Menu -->
-                <div class="hidden md:flex items-center">
-                    <div class="ml-10 flex items-baseline space-x-6">
-                        <a href="#home" class="hover:text-cyan-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Beranda</a>
-                        <a href="#catalog" class="hover:text-cyan-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Katalog</a>
-                        <a href="#features" class="hover:text-cyan-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">Fitur</a>
-                        <a href="#faq" class="hover:text-cyan-400 px-3 py-2 rounded-md text-sm font-medium transition-colors">FAQ</a>
-                        <a href="https://wa.me/6285161141114" target="_blank" class="px-5 py-2 bg-gradient-to-r from-cyan-600 to-sky-500 text-white font-bold rounded-full hover:shadow-[0_0_15px_rgba(34,211,238,0.6)] transition-all transform hover:scale-105 text-xs tracking-wider">HUBUNGI KAMI</a>
-                        
-                        <!-- Login Button Desktop -->
-                        <button id="nav-auth-desktop" onclick="toggleAdminModal()" class="text-slate-400 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors border border-white/10 hover:border-cyan-400 ml-4 flex items-center">
-                            <i class="fas fa-lock mr-2 text-xs"></i> Login
-                        </button>
-                    </div>
+                <div class="hidden md:flex items-center space-x-6">
+                    <a href="#home" class="hover:text-sky-600 dark:hover:text-cyan-400 px-3 py-2 rounded-md text-sm font-bold transition-colors text-slate-600 dark:text-slate-200">Beranda</a>
+                    <a href="#catalog" class="hover:text-sky-600 dark:hover:text-cyan-400 px-3 py-2 rounded-md text-sm font-bold transition-colors text-slate-600 dark:text-slate-200">Katalog</a>
+                    <a href="#features" class="hover:text-sky-600 dark:hover:text-cyan-400 px-3 py-2 rounded-md text-sm font-bold transition-colors text-slate-600 dark:text-slate-200">Fitur</a>
+                    <a href="#faq" class="hover:text-sky-600 dark:hover:text-cyan-400 px-3 py-2 rounded-md text-sm font-bold transition-colors text-slate-600 dark:text-slate-200">FAQ</a>
+                    
+                    <!-- Theme Toggle -->
+                    <button onclick="toggleTheme()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-transparent flex items-center justify-center text-yellow-500 dark:text-cyan-300 hover:scale-110 transition-transform shadow-sm">
+                        <i id="theme-icon" class="fas fa-moon"></i>
+                    </button>
+
+                    <a href="https://wa.me/6285161141114" target="_blank" class="px-5 py-2 bg-gradient-to-r from-sky-500 to-blue-600 dark:from-cyan-600 dark:to-sky-500 text-white font-bold rounded-full hover:shadow-lg hover:shadow-sky-500/30 transition-all transform hover:scale-105 text-xs tracking-wider">HUBUNGI KAMI</a>
+                    
+                    <!-- Login Button Desktop -->
+                    <button id="nav-auth-desktop" onclick="toggleAdminModal()" class="text-slate-600 dark:text-slate-400 hover:text-sky-600 dark:hover:text-white px-3 py-2 rounded-md text-sm font-bold transition-colors border border-slate-300 dark:border-white/10 hover:border-sky-400 dark:hover:border-cyan-400 ml-2 flex items-center">
+                        <i class="fas fa-lock mr-2 text-xs"></i> Login
+                    </button>
                 </div>
                 <!-- Mobile Menu Button -->
-                <div class="-mr-2 flex md:hidden">
-                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-cyan-400 hover:text-white focus:outline-none" onclick="toggleMobileMenu()">
+                <div class="-mr-2 flex md:hidden items-center gap-4">
+                    <button onclick="toggleTheme()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-transparent flex items-center justify-center text-yellow-500 dark:text-cyan-300">
+                        <i id="theme-icon-mobile" class="fas fa-moon"></i>
+                    </button>
+                    <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-slate-600 dark:text-cyan-400 hover:text-sky-500 dark:hover:text-white focus:outline-none" onclick="toggleMobileMenu()">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                 </div>
             </div>
         </div>
         <!-- Mobile Menu -->
-        <div class="hidden md:hidden bg-[#020617]/95 backdrop-blur-xl border-t border-white/10" id="mobile-menu">
+        <div class="hidden md:hidden bg-white/95 dark:bg-[#020617]/95 backdrop-blur-xl border-t border-slate-200 dark:border-white/10" id="mobile-menu">
             <div class="px-4 pt-4 pb-6 space-y-2">
-                <a href="#home" class="block px-3 py-2 rounded-lg text-sm font-medium text-white hover:bg-white/5 hover:text-cyan-400">Beranda</a>
-                <a href="#catalog" class="block px-3 py-2 rounded-lg text-sm font-medium text-white hover:bg-white/5 hover:text-cyan-400">Katalog</a>
-                <a href="#features" class="block px-3 py-2 rounded-lg text-sm font-medium text-white hover:bg-white/5 hover:text-cyan-400">Fitur</a>
-                <a href="#faq" class="block px-3 py-2 rounded-lg text-sm font-medium text-white hover:bg-white/5 hover:text-cyan-400">FAQ</a>
-                <a href="https://wa.me/6285161141114" class="block px-3 py-2 rounded-lg text-sm font-medium text-cyan-400 hover:bg-white/5">Kontak</a>
-                
-                <!-- Login Button Mobile -->
-                <button id="nav-auth-mobile" onclick="toggleAdminModal()" class="block w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-300 hover:bg-white/5 hover:text-white border-t border-white/10 mt-2 pt-3">
+                <a href="#home" class="block px-3 py-2 rounded-lg text-sm font-bold text-slate-700 dark:text-white hover:bg-slate-100 dark:hover:bg-white/5">Beranda</a>
+                <a href="#catalog" class="block px-3 py-2 rounded-lg text-sm font-bold text-slate-700 dark:text-white hover:bg-slate-100 dark:hover:bg-white/5">Katalog</a>
+                <a href="#features" class="block px-3 py-2 rounded-lg text-sm font-bold text-slate-700 dark:text-white hover:bg-slate-100 dark:hover:bg-white/5">Fitur</a>
+                <a href="#faq" class="block px-3 py-2 rounded-lg text-sm font-bold text-slate-700 dark:text-white hover:bg-slate-100 dark:hover:bg-white/5">FAQ</a>
+                <a href="https://wa.me/6285161141114" class="block px-3 py-2 rounded-lg text-sm font-medium text-sky-600 dark:text-cyan-400 hover:bg-slate-100 dark:hover:bg-white/5">Kontak</a>
+                <button id="nav-auth-mobile" onclick="toggleAdminModal()" class="block w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 border-t border-slate-200 dark:border-white/10 mt-2 pt-3">
                     <i class="fas fa-lock mr-2 text-xs"></i> Login Admin
                 </button>
             </div>
@@ -198,22 +257,28 @@
 
     <!-- Hero Section -->
     <section id="home" class="relative min-h-[90vh] flex items-center justify-center pt-20 overflow-hidden">
-        <div class="absolute top-1/4 -left-20 w-64 h-64 bg-cyan-500/10 rounded-full blur-[80px] animate-float"></div>
-        <div class="absolute bottom-1/4 -right-20 w-80 h-80 bg-sky-600/10 rounded-full blur-[100px] animate-float" style="animation-delay: 2s"></div>
+        <!-- Blobs -->
+        <div class="absolute top-1/4 -left-20 w-64 h-64 bg-sky-200/60 dark:bg-cyan-500/10 rounded-full blur-[80px] animate-float"></div>
+        <div class="absolute bottom-1/4 -right-20 w-80 h-80 bg-blue-200/60 dark:bg-sky-600/10 rounded-full blur-[100px] animate-float" style="animation-delay: 2s"></div>
+        
         <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center" data-aos="fade-up">
-            <div class="inline-block mb-4 px-3 py-1 border border-cyan-500/30 rounded-full bg-cyan-500/5 backdrop-blur-sm">
-                <span class="text-cyan-300 text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase">Malik Faza Studio</span>
+            <div class="inline-block mb-4 px-3 py-1 border border-sky-300 dark:border-cyan-500/30 rounded-full bg-white/40 dark:bg-cyan-500/5 backdrop-blur-sm">
+                <span class="text-sky-700 dark:text-cyan-300 text-[10px] md:text-xs font-bold tracking-[0.2em] uppercase">Malik Faza Studio</span>
             </div>
-            <h1 class="text-4xl md:text-7xl font-heading font-bold mb-4 md:mb-6 leading-tight tracking-wide">
+            <h1 class="text-4xl md:text-7xl font-heading font-bold mb-4 md:mb-6 leading-tight tracking-wide text-slate-900 dark:text-white">
                 UNDANGAN <br> <span class="text-cyan-glow">DIGITAL</span>
             </h1>
-            <p class="mt-2 max-w-lg mx-auto text-sm md:text-lg text-slate-300 font-light mb-8 leading-relaxed px-4">
+            <p class="mt-2 max-w-lg mx-auto text-sm md:text-lg text-slate-600 dark:text-slate-300 font-light mb-8 leading-relaxed px-4">
                 Solusi undangan digital masa kini. Hemat, praktis, & estetik dengan nuansa modern yang elegan.
             </p>
             <div class="flex flex-col sm:flex-row gap-3 justify-center px-6">
-                <a href="#catalog" class="px-6 py-3 bg-gradient-to-r from-cyan-600 to-sky-500 text-white text-sm font-bold rounded-full shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/40 transition-all hover:-translate-y-1">Lihat Katalog</a>
-                <a href="https://wa.me/6285161141114" target="_blank" class="px-6 py-3 border border-white/10 hover:border-cyan-400 hover:text-cyan-300 bg-white/5 backdrop-blur-sm text-sm font-semibold rounded-full transition-all">Konsultasi</a>
+                <a href="#catalog" class="px-6 py-3 bg-gradient-to-r from-sky-500 to-blue-600 dark:from-cyan-600 dark:to-sky-500 text-white text-sm font-bold rounded-full shadow-lg shadow-sky-500/30 dark:shadow-cyan-500/20 hover:shadow-sky-500/50 dark:hover:shadow-cyan-500/40 transition-all hover:-translate-y-1">Lihat Katalog</a>
+                <a href="https://wa.me/6285161141114" target="_blank" class="px-6 py-3 border border-sky-300 dark:border-white/10 text-sky-700 dark:text-cyan-300 bg-white/40 dark:bg-white/5 backdrop-blur-sm text-sm font-bold rounded-full hover:bg-white/60 dark:hover:border-cyan-400 transition-all">Konsultasi</a>
             </div>
+        </div>
+        
+        <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 animate-bounce text-sky-500 dark:text-cyan-400 opacity-70">
+            <i class="fas fa-chevron-down text-sm"></i>
         </div>
     </section>
 
@@ -221,11 +286,11 @@
     <section id="catalog" class="py-16 md:py-24 relative z-10">
         <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-10" data-aos="fade-up">
-                <h2 class="text-2xl md:text-4xl font-heading font-bold mb-3 text-white">Koleksi Desain</h2>
-                <div class="w-16 h-1 bg-gradient-to-r from-cyan-400 to-sky-500 mx-auto rounded-full mb-4"></div>
-                <p class="text-slate-400 text-xs md:text-base max-w-xl mx-auto">Temukan tema impian Anda di sini.</p>
+                <h2 class="text-2xl md:text-4xl font-heading font-bold mb-3 text-slate-800 dark:text-white">Koleksi Desain</h2>
+                <div class="w-16 h-1 bg-gradient-to-r from-sky-400 to-blue-500 dark:from-cyan-400 dark:to-sky-500 mx-auto rounded-full mb-4"></div>
+                <p class="text-slate-600 dark:text-slate-400 text-xs md:text-base max-w-xl mx-auto">Temukan tema impian Anda di sini.</p>
                 <div id="admin-badge" class="hidden mt-4 flex justify-center items-center gap-2">
-                    <span class="px-3 py-1 bg-green-500/20 text-green-400 border border-green-500/50 rounded-full text-xs font-bold uppercase tracking-wider">
+                    <span class="px-3 py-1 bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400 border border-green-300 dark:border-green-500/50 rounded-full text-xs font-bold uppercase tracking-wider">
                         <i class="fas fa-user-shield mr-1"></i> Mode Admin Aktif
                     </span>
                 </div>
@@ -233,49 +298,48 @@
 
             <div class="max-w-[200px] mx-auto mb-8 relative z-20" data-aos="fade-up" data-aos-delay="100">
                 <div class="relative">
-                    <select id="category-filter" onchange="filterCatalog()" class="block w-full pl-4 pr-10 py-2.5 text-sm border border-white/10 rounded-2xl bg-[#0f172a]/80 text-white focus:outline-none focus:border-cyan-500 transition-all cursor-pointer shadow-lg backdrop-blur-sm text-center appearance-none hover:border-cyan-500/50">
-                        <option value="all" class="text-black">Semua Kategori</option>
-                        <option value="pernikahan" class="text-black">💍 Pernikahan</option>
-                        <option value="khitanan" class="text-black">✂️ Khitanan</option>
-                        <option value="aqiqah" class="text-black">👶 Aqiqah</option>
+                    <select id="category-filter" onchange="filterCatalog()" class="block w-full pl-4 pr-10 py-2.5 text-sm border-2 border-sky-100 dark:border-white/10 rounded-2xl bg-white dark:bg-[#0f172a]/80 text-slate-700 dark:text-white focus:outline-none focus:border-sky-500 dark:focus:border-cyan-500 transition-all cursor-pointer shadow-lg backdrop-blur-sm text-center appearance-none hover:border-sky-400 dark:hover:border-cyan-500/50 font-bold">
+                        <option value="all">Semua Kategori</option>
+                        <option value="pernikahan">💍 Pernikahan</option>
+                        <option value="khitanan">✂️ Khitanan</option>
+                        <option value="aqiqah">👶 Aqiqah</option>
                     </select>
                 </div>
             </div>
 
             <div id="catalog-grid" class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 min-h-[400px]">
-                <!-- Loading State (will be replaced) -->
                 <div class="col-span-full text-center py-10 text-slate-500 animate-pulse">Memuat data...</div>
             </div>
 
             <div id="empty-state" class="hidden py-8 text-center">
-                <div class="text-4xl mb-2">🔍</div>
+                <div class="text-4xl mb-2 text-slate-300">🔍</div>
                 <p class="text-slate-400 text-sm">Kategori belum tersedia.</p>
             </div>
         </div>
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="py-16 bg-gradient-to-t from-[#0f172a]/50 to-[#020617]/50 border-t border-white/5 relative z-10 backdrop-blur-sm">
+    <section id="features" class="py-16 bg-white/60 dark:bg-gradient-to-t dark:from-[#0f172a]/50 dark:to-[#020617]/50 border-t border-slate-200 dark:border-white/5 relative z-10 backdrop-blur-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16" data-aos="fade-up">
-                <h2 class="text-3xl font-heading font-bold mb-4 text-white">Mengapa Memilih Kami?</h2>
-                <div class="w-24 h-1 bg-cyan-400 mx-auto rounded-full"></div>
+                <h2 class="text-3xl font-heading font-bold mb-4 text-slate-800 dark:text-white">Mengapa Memilih Kami?</h2>
+                <div class="w-24 h-1 bg-sky-400 dark:bg-cyan-400 mx-auto rounded-full"></div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="p-8 rounded-2xl bg-white/5 border border-white/5 text-center hover:bg-white/10 transition-colors group hover:border-cyan-400/50" data-aos="fade-up">
-                    <div class="w-16 h-16 bg-cyan-400/10 text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl group-hover:scale-110 transition-transform"><i class="fas fa-gem"></i></div>
-                    <h3 class="text-xl font-bold text-white mb-3">Desain Premium</h3>
-                    <p class="text-slate-400 text-sm leading-relaxed">Estetika tinggi untuk momen spesial.</p>
+                <div class="p-8 rounded-2xl bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 text-center hover:bg-slate-50 dark:hover:bg-white/10 transition-colors group hover:border-sky-200 dark:hover:border-cyan-400/50 shadow-sm dark:shadow-none" data-aos="fade-up">
+                    <div class="w-16 h-16 bg-sky-100 dark:bg-cyan-400/10 text-sky-500 dark:text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl group-hover:scale-110 transition-transform"><i class="fas fa-gem"></i></div>
+                    <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-3">Desain Premium</h3>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">Estetika tinggi untuk momen spesial.</p>
                 </div>
-                <div class="p-8 rounded-2xl bg-white/5 border border-white/5 text-center hover:bg-white/10 transition-colors group hover:border-cyan-400/50" data-aos="fade-up" data-aos-delay="100">
-                    <div class="w-16 h-16 bg-cyan-400/10 text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl group-hover:scale-110 transition-transform"><i class="fas fa-bolt"></i></div>
-                    <h3 class="text-xl font-bold text-white mb-3">Proses Cepat</h3>
-                    <p class="text-slate-400 text-sm leading-relaxed">Siap disebar dalam waktu singkat.</p>
+                <div class="p-8 rounded-2xl bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 text-center hover:bg-slate-50 dark:hover:bg-white/10 transition-colors group hover:border-sky-200 dark:hover:border-cyan-400/50 shadow-sm dark:shadow-none" data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-16 h-16 bg-sky-100 dark:bg-cyan-400/10 text-sky-500 dark:text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl group-hover:scale-110 transition-transform"><i class="fas fa-bolt"></i></div>
+                    <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-3">Proses Cepat</h3>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">Siap disebar dalam waktu singkat.</p>
                 </div>
-                <div class="p-8 rounded-2xl bg-white/5 border border-white/5 text-center hover:bg-white/10 transition-colors group hover:border-cyan-400/50" data-aos="fade-up" data-aos-delay="200">
-                    <div class="w-16 h-16 bg-cyan-400/10 text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl group-hover:scale-110 transition-transform"><i class="fas fa-infinity"></i></div>
-                    <h3 class="text-xl font-bold text-white mb-3">Revisi Tanpa Batas</h3>
-                    <p class="text-slate-400 text-sm leading-relaxed">Garansi revisi data hingga sesuai.</p>
+                <div class="p-8 rounded-2xl bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 text-center hover:bg-slate-50 dark:hover:bg-white/10 transition-colors group hover:border-sky-200 dark:hover:border-cyan-400/50 shadow-sm dark:shadow-none" data-aos="fade-up" data-aos-delay="200">
+                    <div class="w-16 h-16 bg-sky-100 dark:bg-cyan-400/10 text-sky-500 dark:text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl group-hover:scale-110 transition-transform"><i class="fas fa-infinity"></i></div>
+                    <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-3">Revisi Tanpa Batas</h3>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">Garansi revisi data hingga sesuai.</p>
                 </div>
             </div>
         </div>
@@ -285,8 +349,8 @@
     <section id="faq" class="py-16 relative z-10">
         <div class="max-w-3xl mx-auto px-6">
             <div class="text-center mb-8" data-aos="fade-up">
-                <h2 class="text-2xl font-heading font-bold mb-2 text-white">FAQ</h2>
-                <div class="w-10 h-0.5 bg-cyan-500 mx-auto rounded-full"></div>
+                <h2 class="text-2xl font-heading font-bold mb-2 text-slate-800 dark:text-white">FAQ</h2>
+                <div class="w-10 h-0.5 bg-sky-500 dark:bg-cyan-500 mx-auto rounded-full"></div>
             </div>
             <div id="faq-list" class="space-y-3" data-aos="fade-up">
                 <div class="text-center text-slate-500 text-sm">Memuat FAQ...</div>
@@ -295,22 +359,22 @@
     </section>
 
     <!-- Footer -->
-    <footer id="contact" class="bg-[#020617] pt-12 pb-8 border-t border-white/5 relative z-10">
+    <footer id="contact" class="bg-white dark:bg-[#020617] pt-12 pb-8 border-t border-slate-200 dark:border-white/5 relative z-10 transition-colors duration-500">
         <div class="max-w-6xl mx-auto px-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <div>
-                    <h3 class="font-heading text-xl font-bold text-white mb-2">MALIK<span class="text-cyan-glow">FAZA</span></h3>
+                    <h3 class="font-heading text-xl font-bold text-slate-800 dark:text-white mb-2">MALIK<span class="text-cyan-glow">FAZA</span></h3>
                     <p class="text-xs text-slate-500 mb-6 max-w-xs">Solusi undangan digital masa kini.</p>
                 </div>
                 <div class="text-sm">
-                     <h4 class="text-white font-bold mb-4 text-xs uppercase tracking-wider">Kontak</h4>
-                     <ul class="space-y-3 text-slate-400 text-xs">
-                        <li class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-cyan-500"></i> <span>Majalengka, Jawa Barat</span></li>
-                        <li class="flex items-center gap-2 group"><i class="fas fa-phone text-sky-500"></i> <a href="https://wa.me/6285161141114" target="_blank" class="hover:text-cyan-400 transition-colors">+62 851-6114-1114</a></li>
+                     <h4 class="text-slate-800 dark:text-white font-bold mb-4 text-xs uppercase tracking-wider">Kontak</h4>
+                     <ul class="space-y-3 text-slate-500 dark:text-slate-400 text-xs">
+                        <li class="flex items-center gap-2"><i class="fas fa-map-marker-alt text-sky-500 dark:text-cyan-500"></i> <span>Majalengka, Jawa Barat</span></li>
+                        <li class="flex items-center gap-2 group"><i class="fas fa-phone text-sky-500"></i> <a href="https://wa.me/6285161141114" target="_blank" class="hover:text-sky-600 dark:hover:text-cyan-400 transition-colors">+62 851-6114-1114</a></li>
                      </ul>
                 </div>
             </div>
-            <div class="border-t border-white/5 pt-6 text-center text-[10px] text-slate-600">
+            <div class="border-t border-slate-100 dark:border-white/5 pt-6 text-center text-[10px] text-slate-400 dark:text-slate-600">
                 &copy; 2025 Malik Faza Studio.
             </div>
         </div>
@@ -319,86 +383,86 @@
     <!-- ===== MODALS ===== -->
 
     <!-- Admin Login Modal -->
-    <div id="login-modal" class="modal hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm">
-        <div class="bg-[#0f172a] p-8 rounded-2xl border border-white/10 w-full max-w-xs relative text-center shadow-2xl">
-            <button onclick="toggleAdminModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
-            <h3 class="text-xl font-bold text-white mb-6 font-heading">Admin Login</h3>
+    <div id="login-modal" class="modal hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/50 dark:bg-black/80 backdrop-blur-sm">
+        <div class="bg-white dark:bg-[#0f172a] p-8 rounded-2xl border border-slate-200 dark:border-white/10 w-full max-w-xs relative text-center shadow-2xl">
+            <button onclick="toggleAdminModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800 dark:hover:text-white"><i class="fas fa-times"></i></button>
+            <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-6 font-heading">Admin Login</h3>
             <div class="relative w-full mb-4">
-                <input type="password" id="admin-pass-input" placeholder="Masukkan Password" class="w-full px-4 py-2 pr-10 bg-black/50 border border-white/10 rounded-lg text-white focus:outline-none focus:border-cyan-500">
-                <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-2.5 text-slate-400 hover:text-white focus:outline-none">
+                <input type="password" id="admin-pass-input" placeholder="Masukkan Password" class="w-full px-4 py-2 pr-10 bg-slate-100 dark:bg-black/50 border border-slate-200 dark:border-white/10 rounded-lg text-slate-800 dark:text-white focus:outline-none focus:border-sky-500 dark:focus:border-cyan-500">
+                <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-white focus:outline-none">
                     <i id="eye-icon" class="fas fa-eye"></i>
                 </button>
             </div>
-            <button onclick="checkAdminLogin()" class="w-full py-2 bg-gradient-to-r from-cyan-600 to-sky-500 text-white font-bold rounded-lg hover:shadow-[0_0_15px_rgba(34,211,238,0.4)] transition-all">MASUK</button>
+            <button onclick="checkAdminLogin()" class="w-full py-2 bg-gradient-to-r from-sky-500 to-blue-600 dark:from-cyan-600 dark:to-sky-500 text-white font-bold rounded-lg hover:shadow-lg transition-all">MASUK</button>
         </div>
     </div>
 
     <!-- Add/Edit Item Modal -->
-    <div id="form-modal" class="modal hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm overflow-y-auto py-10">
-        <div class="bg-[#0f172a] p-8 rounded-2xl border border-white/10 w-full max-w-md relative shadow-2xl my-auto">
-            <button onclick="closeFormModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
-            <h3 id="form-title" class="text-xl font-bold text-white mb-6 font-heading">Tambah Desain</h3>
+    <div id="form-modal" class="modal hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/50 dark:bg-black/80 backdrop-blur-sm overflow-y-auto py-10">
+        <div class="bg-white dark:bg-[#0f172a] p-8 rounded-2xl border border-slate-200 dark:border-white/10 w-full max-w-md relative shadow-2xl my-auto">
+            <button onclick="closeFormModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800 dark:hover:text-white"><i class="fas fa-times"></i></button>
+            <h3 id="form-title" class="text-xl font-bold text-slate-800 dark:text-white mb-6 font-heading">Tambah Desain</h3>
             
             <input type="hidden" id="item-id">
             
             <div class="space-y-4">
                 <div>
-                    <label class="text-xs text-slate-400 mb-1 block">Judul Tema</label>
-                    <input type="text" id="item-title" class="w-full px-4 py-2 bg-black/50 border border-white/10 rounded-lg text-white focus:border-cyan-500 focus:outline-none">
+                    <label class="text-xs text-slate-500 dark:text-slate-400 mb-1 block">Judul Tema</label>
+                    <input type="text" id="item-title" class="w-full px-4 py-2 bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-white/10 rounded-lg text-slate-800 dark:text-white focus:border-sky-500 dark:focus:border-cyan-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="text-xs text-slate-400 mb-1 block">Kategori</label>
-                    <select id="item-category" class="w-full px-4 py-2 bg-black/50 border border-white/10 rounded-lg text-white focus:border-cyan-500 focus:outline-none">
+                    <label class="text-xs text-slate-500 dark:text-slate-400 mb-1 block">Kategori</label>
+                    <select id="item-category" class="w-full px-4 py-2 bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-white/10 rounded-lg text-slate-800 dark:text-white focus:border-sky-500 dark:focus:border-cyan-500 focus:outline-none">
                         <option value="pernikahan">Pernikahan</option>
                         <option value="khitanan">Khitanan</option>
                         <option value="aqiqah">Aqiqah</option>
                     </select>
                 </div>
                 <div>
-                    <label class="text-xs text-slate-400 mb-1 block">Link Preview (URL)</label>
-                    <input type="text" id="item-link" class="w-full px-4 py-2 bg-black/50 border border-white/10 rounded-lg text-white focus:border-cyan-500 focus:outline-none">
+                    <label class="text-xs text-slate-500 dark:text-slate-400 mb-1 block">Link Preview (URL)</label>
+                    <input type="text" id="item-link" class="w-full px-4 py-2 bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-white/10 rounded-lg text-slate-800 dark:text-white focus:border-sky-500 dark:focus:border-cyan-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="text-xs text-slate-400 mb-1 block">Tag (Opsional)</label>
-                    <input type="text" id="item-tag" placeholder="Contoh: Premium, Best Seller" class="w-full px-4 py-2 bg-black/50 border border-white/10 rounded-lg text-white focus:border-cyan-500 focus:outline-none">
+                    <label class="text-xs text-slate-500 dark:text-slate-400 mb-1 block">Tag (Opsional)</label>
+                    <input type="text" id="item-tag" placeholder="Contoh: Premium, Best Seller" class="w-full px-4 py-2 bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-white/10 rounded-lg text-slate-800 dark:text-white focus:border-sky-500 dark:focus:border-cyan-500 focus:outline-none">
                 </div>
                 
                 <!-- Image Upload with Preview -->
                 <div>
-                    <label class="text-xs text-slate-400 mb-1 block">Foto Sampul</label>
-                    <div id="upload-area" class="relative w-full h-48 bg-black/50 border-2 border-dashed border-white/20 rounded-lg flex items-center justify-center overflow-hidden group cursor-pointer hover:border-cyan-500 transition-colors" tabindex="0">
+                    <label class="text-xs text-slate-500 dark:text-slate-400 mb-1 block">Foto Sampul</label>
+                    <div id="upload-area" class="relative w-full h-48 bg-slate-50 dark:bg-black/50 border-2 border-dashed border-slate-300 dark:border-white/20 rounded-lg flex items-center justify-center overflow-hidden group cursor-pointer hover:border-sky-500 dark:hover:border-cyan-500 transition-colors" tabindex="0">
                         <input type="file" id="item-image-file" accept="image/png, image/jpeg, image/jpg" class="absolute inset-0 opacity-0 cursor-pointer z-10" onchange="previewImage(this)">
                         <img id="image-preview" class="w-full h-full object-cover hidden" />
                         <div id="upload-placeholder" class="text-center p-4">
-                            <i class="fas fa-cloud-upload-alt text-2xl text-slate-500 mb-2"></i>
-                            <p class="text-xs text-slate-500">Klik untuk upload foto <br> atau <span class="text-cyan-400 font-bold">Paste (Ctrl+V)</span> disini</p>
+                            <i class="fas fa-cloud-upload-alt text-2xl text-slate-400 dark:text-slate-500 mb-2"></i>
+                            <p class="text-xs text-slate-500">Klik untuk upload foto <br> atau <span class="text-sky-500 dark:text-cyan-400 font-bold">Paste (Ctrl+V)</span> disini</p>
                         </div>
                     </div>
                 </div>
 
-                <button onclick="saveItem()" class="w-full py-3 bg-gradient-to-r from-cyan-600 to-sky-500 text-white font-bold rounded-lg hover:shadow-[0_0_15px_rgba(34,211,238,0.4)] transition-all mt-4">SIMPAN DATA</button>
+                <button onclick="saveItem()" class="w-full py-3 bg-gradient-to-r from-sky-500 to-blue-600 dark:from-cyan-600 dark:to-sky-500 text-white font-bold rounded-lg hover:shadow-lg transition-all mt-4">SIMPAN DATA</button>
             </div>
         </div>
     </div>
 
     <!-- FAQ Modal (Add/Edit) -->
-    <div id="faq-modal" class="modal hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/80 backdrop-blur-sm">
-        <div class="bg-[#0f172a] p-8 rounded-2xl border border-white/10 w-full max-w-md relative shadow-2xl">
-            <button onclick="closeFaqModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fas fa-times"></i></button>
-            <h3 id="faq-modal-title" class="text-xl font-bold text-white mb-6 font-heading">Tambah FAQ</h3>
+    <div id="faq-modal" class="modal hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/50 dark:bg-black/80 backdrop-blur-sm">
+        <div class="bg-white dark:bg-[#0f172a] p-8 rounded-2xl border border-slate-200 dark:border-white/10 w-full max-w-md relative shadow-2xl">
+            <button onclick="closeFaqModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800 dark:hover:text-white"><i class="fas fa-times"></i></button>
+            <h3 id="faq-modal-title" class="text-xl font-bold text-slate-800 dark:text-white mb-6 font-heading">Tambah FAQ</h3>
             
             <input type="hidden" id="faq-id">
             
             <div class="space-y-4">
                 <div>
-                    <label class="text-xs text-slate-400 mb-1 block">Pertanyaan</label>
-                    <input type="text" id="faq-question" class="w-full px-4 py-2 bg-black/50 border border-white/10 rounded-lg text-white focus:border-cyan-500 focus:outline-none">
+                    <label class="text-xs text-slate-500 dark:text-slate-400 mb-1 block">Pertanyaan</label>
+                    <input type="text" id="faq-question" class="w-full px-4 py-2 bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-white/10 rounded-lg text-slate-800 dark:text-white focus:border-sky-500 dark:focus:border-cyan-500 focus:outline-none">
                 </div>
                 <div>
-                    <label class="text-xs text-slate-400 mb-1 block">Jawaban</label>
-                    <textarea id="faq-answer" rows="3" class="w-full px-4 py-2 bg-black/50 border border-white/10 rounded-lg text-white focus:border-cyan-500 focus:outline-none"></textarea>
+                    <label class="text-xs text-slate-500 dark:text-slate-400 mb-1 block">Jawaban</label>
+                    <textarea id="faq-answer" rows="3" class="w-full px-4 py-2 bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-white/10 rounded-lg text-slate-800 dark:text-white focus:border-sky-500 dark:focus:border-cyan-500 focus:outline-none"></textarea>
                 </div>
-                <button onclick="saveFaq()" class="w-full py-3 bg-gradient-to-r from-sky-600 to-blue-500 text-white font-bold rounded-lg hover:brightness-110 transition-all">SIMPAN FAQ</button>
+                <button onclick="saveFaq()" class="w-full py-3 bg-gradient-to-r from-sky-500 to-blue-600 dark:from-cyan-600 dark:to-sky-500 text-white font-bold rounded-lg hover:shadow-lg transition-all">SIMPAN FAQ</button>
             </div>
         </div>
     </div>
@@ -413,13 +477,13 @@
 
         // --- GANTI BAGIAN INI DENGAN CONFIG FIREBASE KAKAK ---
         const firebaseConfig = {
-  apiKey: "AIzaSyBoNAKRutDNTT7QjBH1NzHU5sXX31bxjXM",
-  authDomain: "katalog-82fbf.firebaseapp.com",
-  projectId: "katalog-82fbf",
-  storageBucket: "katalog-82fbf.firebasestorage.app",
-  messagingSenderId: "410997646826",
-  appId: "1:410997646826:web:8d292ce5afb4955f2bbe93",
-  measurementId: "G-220BRVP5H5"
+            apiKey: "AIzaSyBoNAKRutDNTT7QjBH1NzHU5sXX31bxjXM",
+            authDomain: "katalog-82fbf.firebaseapp.com",
+            projectId: "katalog-82fbf",
+            storageBucket: "katalog-82fbf.firebasestorage.app",
+            messagingSenderId: "410997646826",
+            appId: "1:410997646826:web:8d292ce5afb4955f2bbe93",
+            measurementId: "G-220BRVP5H5"
         };
         // -----------------------------------------------------
 
@@ -485,19 +549,10 @@
                     Swal.showLoading();
                     try {
                         const batch = writeBatch(db);
-                        
-                        // Get all Catalogs
                         const catSnapshot = await getDocs(collection(db, "catalogs"));
-                        catSnapshot.forEach((doc) => {
-                            batch.delete(doc.ref);
-                        });
-                        
-                        // Get all FAQs
+                        catSnapshot.forEach((doc) => { batch.delete(doc.ref); });
                         const faqSnapshot = await getDocs(collection(db, "faqs"));
-                        faqSnapshot.forEach((doc) => {
-                            batch.delete(doc.ref);
-                        });
-
+                        faqSnapshot.forEach((doc) => { batch.delete(doc.ref); });
                         await batch.commit();
                         Swal.fire('Terhapus', 'Database telah dikosongkan.', 'success');
                     } catch (e) {
@@ -524,14 +579,12 @@
                     Swal.showLoading();
                     const batch = writeBatch(db);
                     
-                    // Upload Catalog
                     initialData.forEach((item) => {
                         const docRef = doc(collection(db, "catalogs")); 
                         const { id, ...data } = item; 
                         batch.set(docRef, { ...data, createdAt: new Date() });
                     });
 
-                    // Upload FAQ
                     initialFaqData.forEach((item) => {
                         const docRef = doc(collection(db, "faqs"));
                         const { id, ...data } = item;
@@ -549,7 +602,6 @@
             });
         }
 
-        // Expose functions globally
         window.saveItem = async function() {
             if (!isFirebaseReady) return Swal.fire('Error', 'Firebase belum dikonfigurasi!', 'error');
 
@@ -569,13 +621,9 @@
 
             try {
                 if (id) {
-                    await updateDoc(doc(db, "catalogs", id), {
-                        title, category, link, tag, image, updatedAt: new Date()
-                    });
+                    await updateDoc(doc(db, "catalogs", id), { title, category, link, tag, image, updatedAt: new Date() });
                 } else {
-                    await addDoc(collection(db, "catalogs"), {
-                        title, category, link, tag, image, createdAt: new Date()
-                    });
+                    await addDoc(collection(db, "catalogs"), { title, category, link, tag, image, createdAt: new Date() });
                 }
                 closeFormModal();
                 Swal.fire({ icon: 'success', title: 'Berhasil', showConfirmButton: false, timer: 1000 });
@@ -644,7 +692,6 @@
 
         // Realtime Listeners
         if (isFirebaseReady) {
-            // Listen Catalog
             onSnapshot(collection(db, "catalogs"), (snapshot) => {
                 if (snapshot.empty) {
                     window.catalogData = initialData;
@@ -661,7 +708,6 @@
                 window.updateAdminUI(); 
             });
 
-            // Listen FAQ
             onSnapshot(collection(db, "faqs"), (snapshot) => {
                 if (snapshot.empty) {
                     window.faqData = initialFaqData;
@@ -696,6 +742,45 @@
         window.tempImageBase64 = "";
         const ADMIN_PASS = "malikfaza99";
 
+        // THEME HANDLING
+        function initTheme() {
+            // Check localStorage
+            if (localStorage.getItem('theme') === 'light') {
+                document.documentElement.classList.remove('dark');
+                updateThemeIcon(true);
+            } else {
+                document.documentElement.classList.add('dark');
+                updateThemeIcon(false);
+            }
+        }
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            if (html.classList.contains('dark')) {
+                html.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                updateThemeIcon(true);
+            } else {
+                html.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                updateThemeIcon(false);
+            }
+            // Trigger resize to update particle background color
+            window.dispatchEvent(new Event('resize')); 
+        }
+
+        function updateThemeIcon(isLight) {
+            const iconDesktop = document.getElementById('theme-icon');
+            const iconMobile = document.getElementById('theme-icon-mobile');
+            // If isLight is true (Light mode), icon should be Moon to switch to Dark
+            // If isLight is false (Dark mode), icon should be Sun to switch to Light
+            
+            const newIcon = isLight ? 'fa-moon' : 'fa-sun';
+            
+            if(iconDesktop) iconDesktop.className = `fas ${newIcon}`;
+            if(iconMobile) iconMobile.className = `fas ${newIcon}`;
+        }
+
         // --- RENDER FUNCTIONS ---
         window.renderCatalog = function() {
             const grid = document.getElementById('catalog-grid');
@@ -709,12 +794,11 @@
                 hasItem = true;
 
                 const card = document.createElement('div');
-                card.className = "catalog-item group relative bg-white/5 rounded-2xl overflow-hidden border border-white/5 transition-all duration-300 hover:border-cyan-400/50 card-hover";
+                card.className = "catalog-item group relative rounded-2xl overflow-hidden transition-all duration-300 card-hover bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5";
                 card.setAttribute('data-aos', 'fade-up');
                 
-                const tagHtml = item.tag ? `<div class="absolute top-2 left-2 z-20"><span class="px-2 py-0.5 bg-cyan-600/90 backdrop-blur-sm text-white text-[9px] font-bold rounded-lg uppercase tracking-wider shadow-lg">${item.tag}</span></div>` : '';
+                const tagHtml = item.tag ? `<div class="absolute top-2 left-2 z-20"><span class="px-2 py-0.5 bg-sky-500/90 dark:bg-cyan-600/90 backdrop-blur-sm text-white text-[9px] font-bold rounded-lg uppercase tracking-wider shadow-lg">${item.tag}</span></div>` : '';
                 
-                // Quote ID properly
                 const idParam = typeof item.id === 'string' ? `'${item.id}'` : item.id;
 
                 const adminControls = window.isAdmin ? `
@@ -726,17 +810,17 @@
 
                 card.innerHTML = `
                     <div class="aspect-[9/16] overflow-hidden relative">
-                        <div class="absolute inset-0 bg-gradient-to-t from-[#020617] to-transparent opacity-60 z-10"></div>
+                        <div class="absolute inset-0 bg-gradient-to-t from-slate-900/50 via-transparent to-transparent z-10 dark:from-[#020617] dark:via-transparent"></div>
                         <img src="${item.image}" onerror="this.src='https://placehold.co/400x700/0f172a/22d3ee?text=No+Image'" class="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700">
                         ${tagHtml}
                         ${adminControls}
                     </div>
-                    <div class="p-3 bg-[#020617]/90 backdrop-blur-md">
-                        <p class="text-cyan-400 text-[9px] font-bold uppercase mb-0.5">${item.category}</p>
-                        <h3 class="text-sm font-serif font-bold text-white mb-2 line-clamp-1">${item.title}</h3>
+                    <div class="p-3 bg-white/90 dark:bg-[#020617]/90 backdrop-blur-md">
+                        <p class="text-sky-500 dark:text-cyan-400 text-[9px] font-bold uppercase mb-0.5">${item.category}</p>
+                        <h3 class="text-sm font-serif font-bold text-slate-800 dark:text-white mb-2 line-clamp-1">${item.title}</h3>
                         <div class="flex gap-2 mt-2">
-                            <a href="${item.link}" target="_blank" class="flex-1 py-2 text-center text-[10px] border border-white/20 rounded-xl hover:bg-white hover:text-black transition-colors">Preview</a>
-                            <a href="https://wa.me/6285161141114?text=Halo%20kak,%20saya%20mau%20pesan%20tema%20${encodeURIComponent(item.title)}" class="flex-1 py-2 text-center text-[10px] bg-gradient-to-r from-cyan-600 to-sky-500 text-white font-bold rounded-xl hover:brightness-110">Pesan</a>
+                            <a href="${item.link}" target="_blank" class="flex-1 py-2 text-center text-[10px] border border-slate-300 dark:border-white/20 rounded-xl text-slate-600 dark:text-white hover:bg-slate-100 dark:hover:bg-white hover:text-slate-800 dark:hover:text-black transition-colors">Preview</a>
+                            <a href="https://wa.me/6285161141114?text=Halo%20kak,%20saya%20mau%20pesan%20tema%20${encodeURIComponent(item.title)}" class="flex-1 py-2 text-center text-[10px] bg-gradient-to-r from-sky-500 to-blue-600 dark:from-cyan-600 dark:to-sky-500 text-white font-bold rounded-xl hover:brightness-110">Pesan</a>
                         </div>
                     </div>
                 `;
@@ -749,7 +833,6 @@
             const container = document.getElementById('faq-list');
             container.innerHTML = '';
             
-            // Fallback content if empty
             if(window.faqData.length === 0) {
                 container.innerHTML = `<div class="text-center text-slate-500 text-xs">Belum ada FAQ.</div>`;
                 return;
@@ -757,22 +840,22 @@
 
             window.faqData.forEach(item => {
                 const details = document.createElement('details');
-                details.className = "group bg-[#0f172a]/60 border border-white/5 rounded-2xl open:bg-[#0f172a]/80 transition-all duration-300 relative";
+                details.className = "group bg-white dark:bg-[#0f172a]/60 border border-slate-200 dark:border-white/5 rounded-2xl open:bg-slate-50 dark:open:bg-[#0f172a]/80 transition-all duration-300 relative shadow-sm dark:shadow-none";
                 
                 const adminControls = window.isAdmin ? `
                     <div class="absolute right-12 top-4 flex gap-2 z-20">
-                         <button onclick="editFaq('${item.id}')" class="text-yellow-500 hover:text-yellow-400 text-xs"><i class="fas fa-edit"></i></button>
-                         <button onclick="deleteFaq('${item.id}')" class="text-red-500 hover:text-red-400 text-xs"><i class="fas fa-trash"></i></button>
+                         <button onclick="editFaq('${item.id}')" class="text-yellow-500 hover:text-yellow-600 text-xs"><i class="fas fa-edit"></i></button>
+                         <button onclick="deleteFaq('${item.id}')" class="text-red-500 hover:text-red-600 text-xs"><i class="fas fa-trash"></i></button>
                     </div>
                 ` : '';
 
                 details.innerHTML = `
-                    <summary class="flex justify-between items-center p-4 cursor-pointer text-sm font-medium text-slate-200 hover:text-cyan-300 pr-20">
+                    <summary class="flex justify-between items-center p-4 cursor-pointer text-sm font-medium text-slate-700 dark:text-slate-200 hover:text-sky-500 dark:hover:text-cyan-300 pr-20">
                         <span>${item.q}</span>
-                        <i class="fas fa-chevron-down text-xs transition group-open:rotate-180 text-cyan-400 absolute right-4"></i>
+                        <i class="fas fa-chevron-down text-xs transition group-open:rotate-180 text-sky-500 dark:text-cyan-400 absolute right-4"></i>
                     </summary>
                     ${adminControls}
-                    <div class="px-4 pb-4 text-xs text-slate-400 leading-relaxed border-t border-white/5 pt-2">
+                    <div class="px-4 pb-4 text-xs text-slate-500 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-white/5 pt-2">
                         ${item.a}
                     </div>
                 `;
@@ -826,40 +909,44 @@
             const navAuthMobile = document.getElementById('nav-auth-mobile');
             const adminTools = document.getElementById('admin-tools');
             const badge = document.getElementById('admin-badge');
+            const restoreBtn = document.getElementById('restore-data-btn');
+            const resetBtn = document.getElementById('reset-data-btn');
 
             if (window.isAdmin) {
-                // Change Login to Logout (Desktop)
+                // Desktop
                 navAuthDesktop.innerHTML = '<i class="fas fa-sign-out-alt mr-2 text-xs"></i> Logout';
                 navAuthDesktop.setAttribute('onclick', 'adminLogout()');
-                navAuthDesktop.classList.add('text-red-400', 'border-red-400/50');
-                navAuthDesktop.classList.remove('text-slate-400', 'border-white/10');
+                navAuthDesktop.classList.add('text-red-500', 'border-red-500');
+                navAuthDesktop.classList.remove('text-slate-500', 'border-slate-200');
 
-                // Change Login to Logout (Mobile)
+                // Mobile
                 navAuthMobile.innerHTML = '<i class="fas fa-sign-out-alt mr-2 text-xs"></i> Logout';
                 navAuthMobile.setAttribute('onclick', 'adminLogout()');
-                navAuthMobile.classList.add('text-red-400');
-                navAuthMobile.classList.remove('text-slate-300');
+                navAuthMobile.classList.add('text-red-500');
+                navAuthMobile.classList.remove('text-slate-500');
 
-                // Show Admin Tools
                 adminTools.classList.remove('hidden');
                 badge.classList.remove('hidden');
+                restoreBtn.classList.remove('hidden');
+                resetBtn.classList.remove('hidden');
 
             } else {
-                // Change Logout to Login (Desktop)
+                // Desktop
                 navAuthDesktop.innerHTML = '<i class="fas fa-lock mr-2 text-xs"></i> Login';
                 navAuthDesktop.setAttribute('onclick', 'toggleAdminModal()');
-                navAuthDesktop.classList.remove('text-red-400', 'border-red-400/50');
-                navAuthDesktop.classList.add('text-slate-400', 'border-white/10');
+                navAuthDesktop.classList.remove('text-red-500', 'border-red-500');
+                navAuthDesktop.classList.add('text-slate-500', 'border-slate-200');
 
-                // Change Logout to Login (Mobile)
+                // Mobile
                 navAuthMobile.innerHTML = '<i class="fas fa-lock mr-2 text-xs"></i> Login Admin';
                 navAuthMobile.setAttribute('onclick', 'toggleAdminModal()');
-                navAuthMobile.classList.remove('text-red-400');
-                navAuthMobile.classList.add('text-slate-300');
+                navAuthMobile.classList.remove('text-red-500');
+                navAuthMobile.classList.add('text-slate-500');
 
-                // Hide Admin Tools
                 adminTools.classList.add('hidden');
                 badge.classList.add('hidden');
+                restoreBtn.classList.add('hidden');
+                resetBtn.classList.add('hidden');
             }
             window.renderCatalog(); 
             window.renderFaq();
@@ -881,7 +968,6 @@
             window.tempImageBase64 = "";
 
             if (isEdit && id) {
-                // Prevent edit if ID is numeric (local data)
                 if (typeof id === 'number') {
                     Swal.fire('Info', 'Data ini adalah preview lokal. Silahkan "Upload Data Bawaan" terlebih dahulu di menu Admin untuk mengeditnya.', 'info');
                     return;
@@ -895,7 +981,6 @@
                     document.getElementById('item-category').value = item.category;
                     document.getElementById('item-link').value = item.link;
                     document.getElementById('item-tag').value = item.tag;
-                    
                     window.tempImageBase64 = item.image;
                     const preview = document.getElementById('image-preview');
                     preview.src = item.image;
@@ -912,11 +997,9 @@
         window.closeFormModal = function() { document.getElementById('form-modal').classList.add('hidden'); }
         window.editItem = function(id) { openFormModal(true, id); }
 
-        // --- FAQ FORM ---
         window.openFaqModal = function(isEdit = false, id = null) {
             const modal = document.getElementById('faq-modal');
             const title = document.getElementById('faq-modal-title');
-            
             document.getElementById('faq-id').value = '';
             document.getElementById('faq-question').value = '';
             document.getElementById('faq-answer').value = '';
@@ -938,7 +1021,6 @@
         window.closeFaqModal = function() { document.getElementById('faq-modal').classList.add('hidden'); }
         window.editFaq = function(id) { openFaqModal(true, id); }
 
-        // --- IMAGE & RESIZE LOGIC ---
         window.previewImage = function(input) {
             if (input.files && input.files[0]) {
                 processImage(input.files[0]);
@@ -948,7 +1030,6 @@
         document.addEventListener('paste', function(event) {
             const formModal = document.getElementById('form-modal');
             if (formModal.classList.contains('hidden')) return;
-
             const items = (event.clipboardData || event.originalEvent.clipboardData).items;
             for (let index in items) {
                 const item = items[index];
@@ -968,12 +1049,9 @@
                     const scaleSize = MAX_WIDTH / img.width;
                     canvas.width = MAX_WIDTH;
                     canvas.height = img.height * scaleSize;
-
                     const ctx = canvas.getContext("2d");
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
                     const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
-                    
                     const preview = document.getElementById('image-preview');
                     preview.src = dataUrl;
                     preview.classList.remove('hidden');
@@ -986,11 +1064,9 @@
             reader.readAsDataURL(file);
         }
 
-        // --- COVER & MUSIC ---
         const coverScreen = document.getElementById('cover-screen');
         const audio = document.getElementById('bg-audio');
         const musicBtn = document.getElementById('music-btn');
-        const musicIcon = musicBtn.querySelector('i');
         let isPlaying = false;
 
         window.openCatalog = function() {
@@ -999,13 +1075,10 @@
                 musicBtn.classList.add('music-rotating');
             }).catch(error => {
                 isPlaying = false;
-                musicIcon.classList.remove('fa-music');
-                musicIcon.classList.add('fa-volume-mute');
                 musicBtn.classList.remove('music-rotating');
             });
             coverScreen.classList.add('slide-up');
             musicBtn.classList.remove('hidden');
-            // adminBtn.classList.remove('hidden'); // Removed, handled by navbar
             document.body.style.overflow = 'auto';
         }
 
@@ -1013,19 +1086,15 @@
             if (isPlaying) {
                 audio.pause();
                 isPlaying = false;
-                musicIcon.classList.remove('fa-music');
-                musicIcon.classList.add('fa-volume-mute');
                 musicBtn.classList.remove('music-rotating');
             } else {
                 audio.play();
                 isPlaying = true;
-                musicIcon.classList.remove('fa-volume-mute');
-                musicIcon.classList.add('fa-music');
                 musicBtn.classList.add('music-rotating');
             }
         }
 
-        // --- ANIMATIONS ---
+        // --- STARS & PARTICLES ---
         const starsContainer = document.getElementById('stars-container');
         for (let i = 0; i < 50; i++) {
             const star = document.createElement('div');
@@ -1043,6 +1112,7 @@
         const canvas = document.getElementById('canvas-bg');
         const ctx = canvas.getContext('2d');
         let width, height, particles = [];
+        
         function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
         
         class Particle {
@@ -1051,8 +1121,14 @@
                 this.x = Math.random() * width; this.y = Math.random() * height;
                 this.vx = (Math.random() - 0.5) * 0.2; this.vy = (Math.random() - 0.5) * 0.2;
                 this.size = Math.random() * 1.5 + 0.5; this.alpha = Math.random() * 0.5 + 0.2;
-                const colors = ['34, 211, 238', '56, 189, 248', '14, 165, 233'];
-                this.color = colors[Math.floor(Math.random() * colors.length)];
+                
+                // Color Logic based on Theme
+                const isDark = document.documentElement.classList.contains('dark');
+                const colors_dark = ['34, 211, 238', '56, 189, 248', '14, 165, 233']; // Cyan/Blue
+                const colors_light = ['14, 165, 233', '2, 132, 199', '56, 189, 248']; // Darker Blue for light bg
+                
+                const palette = isDark ? colors_dark : colors_light;
+                this.color = palette[Math.floor(Math.random() * palette.length)];
             }
             update() {
                 this.x += this.vx; this.y += this.vy;
@@ -1063,6 +1139,7 @@
                 ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
             }
         }
+        
         function initParticles() { particles = []; for(let i=0; i<80; i++) particles.push(new Particle()); }
         function animateParticles() {
             ctx.clearRect(0, 0, width, height);
@@ -1078,10 +1155,17 @@
             });
             requestAnimationFrame(animateParticles);
         }
-        window.addEventListener('resize', resize); resize(); initParticles(); animateParticles();
+        
+        window.addEventListener('resize', () => {
+            resize();
+            initParticles(); 
+        });
+        
+        initTheme(); 
+        resize(); initParticles(); animateParticles();
+        
         window.toggleMobileMenu = function() { document.getElementById('mobile-menu').classList.toggle('hidden'); }
 
     </script>
 </body>
 </html>
-
