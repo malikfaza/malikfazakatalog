@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth dark">
+<html lang="id" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -43,11 +43,15 @@
                         'twinkle': 'twinkle 4s ease-in-out infinite',
                         'spin-slow': 'spin 12s linear infinite',
                         'spin-music': 'spin 3s linear infinite',
+                        'bounce-slow': 'bounce 3s infinite',
+                        'scroll-loop': 'scroll-loop 40s linear infinite',
+                        'scroll-loop-fast': 'scroll-loop 20s linear infinite',
                     },
                     keyframes: {
                         float: { '0%, 100%': { transform: 'translateY(0)' }, '50%': { transform: 'translateY(-20px)' } },
                         'pulse-glow': { '0%, 100%': { opacity: 1, filter: 'brightness(100%)' }, '50%': { opacity: 0.7, filter: 'brightness(120%)' } },
-                        twinkle: { '0%, 100%': { opacity: 0.3, transform: 'scale(0.8)' }, '50%': { opacity: 1, transform: 'scale(1.2)' } }
+                        twinkle: { '0%, 100%': { opacity: 0.3, transform: 'scale(0.8)' }, '50%': { opacity: 1, transform: 'scale(1.2)' } },
+                        'scroll-loop': { '0%': { transform: 'translateX(0)' }, '100%': { transform: 'translateX(-50%)' } }
                     }
                 }
             }
@@ -59,29 +63,21 @@
             margin: 0; 
             overflow-x: hidden;
             transition: background 0.5s ease, color 0.5s ease;
+            padding-top: 5rem; 
         }
 
-        /* --- PERBAIKAN BACKGROUND MODE MALAM/SIANG --- */
-        /* Default (Light Mode) */
+        /* --- BACKGROUND STYLING --- */
         body {
-            background: linear-gradient(180deg, #f0f9ff 0%, #e0f2fe 100%);
+            background: linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%);
             color: #1e293b;
         }
         
-        /* Dark Mode (Target parent .dark) */
         .dark body {
-            background: #020617; /* Hitam Pekat */
+            background: #020617;
             color: #e2e8f0;
         }
         
         #canvas-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; transition: opacity 0.5s ease; }
-        
-        /* Cover Screen */
-        #cover-screen { transition: transform 1.0s cubic-bezier(0.77, 0, 0.175, 1), opacity 1.0s ease-out, background 0.5s ease; }
-        #cover-screen.slide-up { transform: translateY(-100%); opacity: 0; pointer-events: none; }
-        
-        .dark #cover-screen { background: radial-gradient(ellipse at bottom, #1e293b 0%, #020617 100%); }
-        html:not(.dark) #cover-screen { background: radial-gradient(ellipse at bottom, #bae6fd 0%, #f0f9ff 100%); }
 
         .star { position: absolute; background: white; border-radius: 50%; animation: twinkle var(--duration) ease-in-out infinite; opacity: var(--opacity); }
         html:not(.dark) .star { background: #38bdf8; } 
@@ -99,20 +95,19 @@
         .card-hover { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         .card-hover:hover { transform: translateY(-8px); }
         
-        /* Dark Mode Card */
         .dark .card-hover:hover { 
             box-shadow: 0 15px 30px -5px rgba(34, 211, 238, 0.15); 
             border-color: rgba(34, 211, 238, 0.5); 
         }
-        /* Light Mode Card */
+        
         html:not(.dark) .card-hover {
             background: #ffffff;
-            border: 2px solid #bae6fd; 
-            box-shadow: 0 4px 6px -1px rgba(14, 165, 233, 0.1);
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
         }
         html:not(.dark) .card-hover:hover {
             border-color: #0ea5e9; 
-            box-shadow: 0 20px 25px -5px rgba(14, 165, 233, 0.25);
+            box-shadow: 0 20px 25px -5px rgba(14, 165, 233, 0.15);
         }
 
         .text-cyan-glow {
@@ -142,19 +137,16 @@
         details > summary::-webkit-details-marker { display: none; }
         details[open] summary ~ * { animation: sweep .3s ease-in-out; }
         @keyframes sweep { 0% {opacity: 0; margin-top: -10px} 100% {opacity: 1; margin-top: 0px} }
+
+        #welcome-popup { transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
     </style>
 </head>
 <body class="antialiased selection:bg-cyan-500 selection:text-white transition-colors duration-500">
 
     <!-- AUDIO ELEMENT -->
     <audio id="bg-audio" loop>
-        <source src="musik.mp3" type="audio/mpeg">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
     </audio>
-
-    <!-- Music Control Button -->
-    <button id="music-btn" onclick="toggleMusic()" class="fixed bottom-6 left-6 z-[60] w-12 h-12 bg-white/80 dark:bg-white/10 backdrop-blur-md border border-sky-300 dark:border-cyan-400/30 rounded-full flex items-center justify-center text-sky-600 dark:text-cyan-400 hover:scale-110 transition-all duration-300 hidden shadow-lg shadow-sky-500/20 dark:shadow-[0_0_20px_rgba(34,211,238,0.3)]">
-        <i class="fas fa-compact-disc text-2xl"></i>
-    </button>
 
     <!-- Admin Floating Tools -->
     <div id="admin-tools" class="hidden">
@@ -164,45 +156,10 @@
         <button id="reset-data-btn" onclick="resetDatabase()" class="fixed top-36 right-6 z-[60] px-4 py-2 bg-red-500 text-white rounded-full text-xs hover:bg-red-600 shadow-lg hidden font-bold"><i class="fas fa-bomb mr-2"></i> Hapus Semua Data</button>
     </div>
 
-    <!-- === COVER SCREEN === -->
-    <section id="cover-screen" class="fixed inset-0 z-[100] flex flex-col items-center justify-center text-center overflow-hidden">
-        <div id="stars-container" class="absolute inset-0 z-0 pointer-events-none"></div>
-        
-        <!-- Blobs Animation (Updated Color for Dark Mode) -->
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full blur-[120px] animate-pulse-glow bg-sky-400/30 dark:bg-cyan-600/20"></div>
-        
-        <div class="relative z-10 px-4" data-aos="zoom-in" data-aos-duration="1500">
-            <div class="mb-6 inline-block">
-                <i class="fas fa-star text-sky-500 dark:text-cyan-300 text-xs animate-twinkle" style="animation-delay: 0s;"></i>
-                <span class="mx-2 text-sky-700 dark:text-cyan-300 text-[10px] tracking-[0.4em] uppercase font-bold">Malik Faza Studio</span>
-                <i class="fas fa-star text-sky-500 dark:text-cyan-300 text-xs animate-twinkle" style="animation-delay: 1s;"></i>
-            </div>
-            <h1 class="text-4xl md:text-6xl font-heading font-bold text-slate-800 dark:text-white mb-2 tracking-widest leading-tight drop-shadow-sm dark:drop-shadow-lg">
-                KATALOG <br>
-                <span class="text-cyan-glow italic font-serif">Exclusive</span>
-            </h1>
-            <p class="text-slate-600 dark:text-slate-400 text-sm md:text-base font-light mb-10 max-w-md mx-auto leading-relaxed">
-                Temukan keindahan dalam setiap detail undangan digital untuk momen spesial Anda.
-            </p>
-            <button onclick="openCatalog()" class="group relative px-8 py-3 bg-transparent overflow-hidden rounded-full border-2 border-sky-500 dark:border-cyan-500/50 hover:border-sky-600 dark:hover:border-cyan-400 transition-all duration-300">
-                <div class="absolute inset-0 w-0 bg-gradient-to-r from-sky-500 to-blue-600 dark:from-cyan-600 dark:to-sky-500 transition-all duration-[250ms] ease-out group-hover:w-full opacity-10"></div>
-                <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-sky-500 to-blue-600 dark:from-cyan-600 dark:to-sky-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
-                <span class="relative flex items-center gap-3 text-sky-700 dark:text-white group-hover:text-white font-bold tracking-wider text-sm">
-                    <i class="fas fa-book-open"></i> BUKA KATALOG
-                </span>
-            </button>
-            <div class="mt-12 text-slate-500 text-[10px] animate-bounce">
-                <p>Ketuk untuk membuka & memutar musik</p>
-                <i class="fas fa-chevron-down mt-2"></i>
-            </div>
-        </div>
-    </section>
-
-    <!-- === MAIN CONTENT === -->
     <canvas id="canvas-bg"></canvas>
 
     <!-- Navbar -->
-    <nav class="fixed w-full z-50 transition-all duration-300 bg-white/90 dark:bg-[#020617]/80 backdrop-blur-md border-b-2 dark:border-b border-sky-100 dark:border-white/5 shadow-sm dark:shadow-none" id="navbar">
+    <nav class="fixed top-0 w-full z-50 transition-all duration-300 bg-white/95 dark:bg-[#020617]/90 backdrop-blur-md border-b border-slate-200 dark:border-white/5 shadow-sm" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16 md:h-20">
                 <div class="flex-shrink-0">
@@ -210,28 +167,34 @@
                         MALIK<span class="text-cyan-glow">FAZA</span>
                     </a>
                 </div>
-                <!-- Desktop Menu -->
-                <div class="hidden md:flex items-center space-x-6">
+                <div class="hidden md:flex items-center space-x-4 lg:space-x-6">
                     <a href="#home" class="hover:text-sky-600 dark:hover:text-cyan-400 px-3 py-2 rounded-md text-sm font-bold transition-colors text-slate-600 dark:text-slate-200">Beranda</a>
                     <a href="#catalog" class="hover:text-sky-600 dark:hover:text-cyan-400 px-3 py-2 rounded-md text-sm font-bold transition-colors text-slate-600 dark:text-slate-200">Katalog</a>
                     <a href="#features" class="hover:text-sky-600 dark:hover:text-cyan-400 px-3 py-2 rounded-md text-sm font-bold transition-colors text-slate-600 dark:text-slate-200">Fitur</a>
+                    <a href="#stats" class="hover:text-sky-600 dark:hover:text-cyan-400 px-3 py-2 rounded-md text-sm font-bold transition-colors text-slate-600 dark:text-slate-200">Stats</a>
+                    <a href="#testimonials" class="hover:text-sky-600 dark:hover:text-cyan-400 px-3 py-2 rounded-md text-sm font-bold transition-colors text-slate-600 dark:text-slate-200">Testimoni</a>
                     <a href="#faq" class="hover:text-sky-600 dark:hover:text-cyan-400 px-3 py-2 rounded-md text-sm font-bold transition-colors text-slate-600 dark:text-slate-200">FAQ</a>
                     
-                    <!-- Theme Toggle -->
-                    <button onclick="toggleTheme()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-transparent flex items-center justify-center text-yellow-500 dark:text-cyan-300 hover:scale-110 transition-transform shadow-sm">
+                    <button id="music-btn-desktop" onclick="toggleMusic()" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-transparent flex items-center justify-center text-sky-500 dark:text-cyan-300 hover:scale-110 transition-transform shadow-sm group" title="Putar Musik">
+                        <i class="fas fa-compact-disc text-lg group-hover:animate-spin"></i>
+                    </button>
+
+                    <button onclick="toggleTheme()" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-transparent flex items-center justify-center text-yellow-500 dark:text-cyan-300 hover:scale-110 transition-transform shadow-sm">
                         <i id="theme-icon" class="fas fa-moon"></i>
                     </button>
 
                     <a href="https://wa.me/6285161141114" target="_blank" class="px-5 py-2 bg-gradient-to-r from-sky-500 to-blue-600 dark:from-cyan-600 dark:to-sky-500 text-white font-bold rounded-full hover:shadow-lg hover:shadow-sky-500/30 transition-all transform hover:scale-105 text-xs tracking-wider">HUBUNGI KAMI</a>
                     
-                    <!-- Login Button Desktop -->
                     <button id="nav-auth-desktop" onclick="toggleAdminModal()" class="text-slate-600 dark:text-slate-400 hover:text-sky-600 dark:hover:text-white px-3 py-2 rounded-md text-sm font-bold transition-colors border border-slate-300 dark:border-white/10 hover:border-sky-400 dark:hover:border-cyan-400 ml-2 flex items-center">
-                        <i class="fas fa-lock mr-2 text-xs"></i> Login
+                        <i class="fas fa-lock mr-2 text-xs"></i>
                     </button>
                 </div>
-                <!-- Mobile Menu Button -->
-                <div class="-mr-2 flex md:hidden items-center gap-4">
-                    <button onclick="toggleTheme()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-transparent flex items-center justify-center text-yellow-500 dark:text-cyan-300">
+                <div class="-mr-2 flex md:hidden items-center gap-3">
+                    <button id="music-btn-mobile" onclick="toggleMusic()" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-transparent flex items-center justify-center text-sky-500 dark:text-cyan-300">
+                        <i class="fas fa-compact-disc"></i>
+                    </button>
+
+                    <button onclick="toggleTheme()" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-white/10 border border-slate-200 dark:border-transparent flex items-center justify-center text-yellow-500 dark:text-cyan-300">
                         <i id="theme-icon-mobile" class="fas fa-moon"></i>
                     </button>
                     <button type="button" class="inline-flex items-center justify-center p-2 rounded-md text-slate-600 dark:text-cyan-400 hover:text-sky-500 dark:hover:text-white focus:outline-none" onclick="toggleMobileMenu()">
@@ -240,12 +203,13 @@
                 </div>
             </div>
         </div>
-        <!-- Mobile Menu -->
         <div class="hidden md:hidden bg-white/95 dark:bg-[#020617]/95 backdrop-blur-xl border-t border-slate-200 dark:border-white/10" id="mobile-menu">
             <div class="px-4 pt-4 pb-6 space-y-2">
                 <a href="#home" class="block px-3 py-2 rounded-lg text-sm font-bold text-slate-700 dark:text-white hover:bg-slate-100 dark:hover:bg-white/5">Beranda</a>
                 <a href="#catalog" class="block px-3 py-2 rounded-lg text-sm font-bold text-slate-700 dark:text-white hover:bg-slate-100 dark:hover:bg-white/5">Katalog</a>
                 <a href="#features" class="block px-3 py-2 rounded-lg text-sm font-bold text-slate-700 dark:text-white hover:bg-slate-100 dark:hover:bg-white/5">Fitur</a>
+                <a href="#stats" class="block px-3 py-2 rounded-lg text-sm font-bold text-slate-700 dark:text-white hover:bg-slate-100 dark:hover:bg-white/5">Stats</a>
+                <a href="#testimonials" class="block px-3 py-2 rounded-lg text-sm font-bold text-slate-700 dark:text-white hover:bg-slate-100 dark:hover:bg-white/5">Testimoni</a>
                 <a href="#faq" class="block px-3 py-2 rounded-lg text-sm font-bold text-slate-700 dark:text-white hover:bg-slate-100 dark:hover:bg-white/5">FAQ</a>
                 <a href="https://wa.me/6285161141114" class="block px-3 py-2 rounded-lg text-sm font-medium text-sky-600 dark:text-cyan-400 hover:bg-slate-100 dark:hover:bg-white/5">Kontak</a>
                 <button id="nav-auth-mobile" onclick="toggleAdminModal()" class="block w-full text-left px-3 py-2 rounded-lg text-sm font-medium text-slate-500 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/5 border-t border-slate-200 dark:border-white/10 mt-2 pt-3">
@@ -256,8 +220,7 @@
     </nav>
 
     <!-- Hero Section -->
-    <section id="home" class="relative min-h-[90vh] flex items-center justify-center pt-20 overflow-hidden">
-        <!-- Blobs -->
+    <section id="home" class="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
         <div class="absolute top-1/4 -left-20 w-64 h-64 bg-sky-200/60 dark:bg-cyan-500/10 rounded-full blur-[80px] animate-float"></div>
         <div class="absolute bottom-1/4 -right-20 w-80 h-80 bg-blue-200/60 dark:bg-sky-600/10 rounded-full blur-[100px] animate-float" style="animation-delay: 2s"></div>
         
@@ -272,13 +235,9 @@
                 Solusi undangan digital masa kini. Hemat, praktis, & estetik dengan nuansa modern yang elegan.
             </p>
             <div class="flex flex-col sm:flex-row gap-3 justify-center px-6">
-                <a href="#catalog" class="px-6 py-3 bg-gradient-to-r from-sky-500 to-blue-600 dark:from-cyan-600 dark:to-sky-500 text-white text-sm font-bold rounded-full shadow-lg shadow-sky-500/30 dark:shadow-cyan-500/20 hover:shadow-sky-500/50 dark:hover:shadow-cyan-500/40 transition-all hover:-translate-y-1">Lihat Katalog</a>
+                <a href="#catalog" onclick="ensureMusicPlaying()" class="px-6 py-3 bg-gradient-to-r from-sky-500 to-blue-600 dark:from-cyan-600 dark:to-sky-500 text-white text-sm font-bold rounded-full shadow-lg shadow-sky-500/30 dark:shadow-cyan-500/20 hover:shadow-sky-500/50 dark:hover:shadow-cyan-500/40 transition-all hover:-translate-y-1">Lihat Katalog</a>
                 <a href="https://wa.me/6285161141114" target="_blank" class="px-6 py-3 border border-sky-300 dark:border-white/10 text-sky-700 dark:text-cyan-300 bg-white/40 dark:bg-white/5 backdrop-blur-sm text-sm font-bold rounded-full hover:bg-white/60 dark:hover:border-cyan-400 transition-all">Konsultasi</a>
             </div>
-        </div>
-        
-        <div class="absolute bottom-6 left-1/2 transform -translate-x-1/2 animate-bounce text-sky-500 dark:text-cyan-400 opacity-70">
-            <i class="fas fa-chevron-down text-sm"></i>
         </div>
     </section>
 
@@ -307,7 +266,7 @@
                 </div>
             </div>
 
-            <div id="catalog-grid" class="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 min-h-[400px]">
+            <div id="catalog-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 min-h-[400px]">
                 <div class="col-span-full text-center py-10 text-slate-500 animate-pulse">Memuat data...</div>
             </div>
 
@@ -319,27 +278,218 @@
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="py-16 bg-white/60 dark:bg-gradient-to-t dark:from-[#0f172a]/50 dark:to-[#020617]/50 border-t border-slate-200 dark:border-white/5 relative z-10 backdrop-blur-sm">
+    <section id="features" class="py-16 bg-slate-50 dark:bg-[#0b1221] border-t border-slate-200 dark:border-white/5 relative z-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16" data-aos="fade-up">
                 <h2 class="text-3xl font-heading font-bold mb-4 text-slate-800 dark:text-white">Mengapa Memilih Kami?</h2>
                 <div class="w-24 h-1 bg-sky-400 dark:bg-cyan-400 mx-auto rounded-full"></div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="p-8 rounded-2xl bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 text-center hover:bg-slate-50 dark:hover:bg-white/10 transition-colors group hover:border-sky-200 dark:hover:border-cyan-400/50 shadow-sm dark:shadow-none" data-aos="fade-up">
-                    <div class="w-16 h-16 bg-sky-100 dark:bg-cyan-400/10 text-sky-500 dark:text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl group-hover:scale-110 transition-transform"><i class="fas fa-gem"></i></div>
+                <div class="p-8 rounded-2xl bg-white dark:bg-[#1e293b]/50 border border-slate-200 dark:border-white/5 text-center hover:-translate-y-1 transition-transform shadow-md hover:shadow-xl duration-300" data-aos="fade-up">
+                    <div class="w-16 h-16 bg-sky-100 dark:bg-cyan-400/10 text-sky-500 dark:text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl"><i class="fas fa-gem"></i></div>
                     <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-3">Desain Premium</h3>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">Estetika tinggi untuk momen spesial.</p>
+                    <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">Pilihan desain eksklusif dengan estetika modern yang memukau tamu undangan Anda.</p>
                 </div>
-                <div class="p-8 rounded-2xl bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 text-center hover:bg-slate-50 dark:hover:bg-white/10 transition-colors group hover:border-sky-200 dark:hover:border-cyan-400/50 shadow-sm dark:shadow-none" data-aos="fade-up" data-aos-delay="100">
-                    <div class="w-16 h-16 bg-sky-100 dark:bg-cyan-400/10 text-sky-500 dark:text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl group-hover:scale-110 transition-transform"><i class="fas fa-bolt"></i></div>
+                <div class="p-8 rounded-2xl bg-white dark:bg-[#1e293b]/50 border border-slate-200 dark:border-white/5 text-center hover:-translate-y-1 transition-transform shadow-md hover:shadow-xl duration-300" data-aos="fade-up" data-aos-delay="100">
+                    <div class="w-16 h-16 bg-sky-100 dark:bg-cyan-400/10 text-sky-500 dark:text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl"><i class="fas fa-bolt"></i></div>
                     <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-3">Proses Cepat</h3>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">Siap disebar dalam waktu singkat.</p>
+                    <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">Pengerjaan kilat tanpa mengurangi kualitas. Undangan siap disebar dalam hitungan jam.</p>
                 </div>
-                <div class="p-8 rounded-2xl bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 text-center hover:bg-slate-50 dark:hover:bg-white/10 transition-colors group hover:border-sky-200 dark:hover:border-cyan-400/50 shadow-sm dark:shadow-none" data-aos="fade-up" data-aos-delay="200">
-                    <div class="w-16 h-16 bg-sky-100 dark:bg-cyan-400/10 text-sky-500 dark:text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl group-hover:scale-110 transition-transform"><i class="fas fa-infinity"></i></div>
+                <div class="p-8 rounded-2xl bg-white dark:bg-[#1e293b]/50 border border-slate-200 dark:border-white/5 text-center hover:-translate-y-1 transition-transform shadow-md hover:shadow-xl duration-300" data-aos="fade-up" data-aos-delay="200">
+                    <div class="w-16 h-16 bg-sky-100 dark:bg-cyan-400/10 text-sky-500 dark:text-cyan-400 rounded-full flex items-center justify-center mx-auto mb-6 text-2xl"><i class="fas fa-infinity"></i></div>
                     <h3 class="text-xl font-bold text-slate-800 dark:text-white mb-3">Revisi Tanpa Batas</h3>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed">Garansi revisi data hingga sesuai.</p>
+                    <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed">Kami menjamin kepuasan Anda dengan layanan revisi data sepuasnya hingga hari H.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- NEW STATS SECTION -->
+    <section id="stats" class="py-12 bg-white/50 dark:bg-[#0f172a]/50 relative z-10 border-t border-slate-200 dark:border-white/5 overflow-hidden">
+        <div class="max-w-6xl mx-auto px-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center" id="counters-container">
+                <div class="stat-item" data-aos="fade-up">
+                    <h3 class="text-3xl md:text-4xl font-heading font-bold text-sky-500 dark:text-cyan-400 mb-2"><span class="counter-value" data-target="1500">0</span>+</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold">Undangan Disebar</p>
+                </div>
+                <div class="stat-item" data-aos="fade-up" data-aos-delay="100">
+                    <h3 class="text-3xl md:text-4xl font-heading font-bold text-sky-500 dark:text-cyan-400 mb-2"><span class="counter-value" data-target="50">0</span>+</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold">Desain Premium</p>
+                </div>
+                <div class="stat-item" data-aos="fade-up" data-aos-delay="200">
+                    <h3 class="text-3xl md:text-4xl font-heading font-bold text-sky-500 dark:text-cyan-400 mb-2"><span class="counter-value" data-target="99">0</span>%</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold">Kepuasan Klien</p>
+                </div>
+                <div class="stat-item" data-aos="fade-up" data-aos-delay="300">
+                    <h3 class="text-3xl md:text-4xl font-heading font-bold text-sky-500 dark:text-cyan-400 mb-2">24/7</h3>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wider font-bold">Layanan Support</p>
+                </div>
+            </div>
+        </div>
+        <!-- Infinite Loop Text Bottom -->
+        <div class="w-full overflow-hidden mt-12 opacity-50">
+            <div class="animate-scroll-loop-fast flex gap-10 whitespace-nowrap text-sm font-bold text-slate-300 dark:text-slate-700 uppercase tracking-widest">
+                <span>Terpercaya</span> <span>•</span> <span>Cepat</span> <span>•</span> <span>Elegan</span> <span>•</span> <span>Modern</span> <span>•</span>
+                <span>Terpercaya</span> <span>•</span> <span>Cepat</span> <span>•</span> <span>Elegan</span> <span>•</span> <span>Modern</span> <span>•</span>
+                <span>Terpercaya</span> <span>•</span> <span>Cepat</span> <span>•</span> <span>Elegan</span> <span>•</span> <span>Modern</span> <span>•</span>
+                <span>Terpercaya</span> <span>•</span> <span>Cepat</span> <span>•</span> <span>Elegan</span> <span>•</span> <span>Modern</span> <span>•</span>
+                <span>Terpercaya</span> <span>•</span> <span>Cepat</span> <span>•</span> <span>Elegan</span> <span>•</span> <span>Modern</span> <span>•</span>
+                <span>Terpercaya</span> <span>•</span> <span>Cepat</span> <span>•</span> <span>Elegan</span> <span>•</span> <span>Modern</span> <span>•</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section id="testimonials" class="py-16 relative z-10 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 mb-12 text-center" data-aos="fade-up">
+            <h2 class="text-2xl font-heading font-bold mb-2 text-slate-800 dark:text-white">Kata Mereka</h2>
+            <div class="w-10 h-0.5 bg-sky-500 dark:bg-cyan-500 mx-auto rounded-full"></div>
+        </div>
+        
+        <div class="relative w-full flex overflow-x-hidden group">
+            <div class="animate-scroll-loop flex gap-6 whitespace-nowrap py-4">
+                <!-- Set 1 -->
+                <div class="w-[300px] flex-shrink-0 p-6 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg">
+                    <p class="text-slate-600 dark:text-slate-300 text-xs italic leading-relaxed mb-4 whitespace-normal">"Hasilnya cantik banget, sesuai ekspektasi! Adminnya juga ramah banget."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-900 flex items-center justify-center text-sky-600 dark:text-sky-300 font-bold text-xs">SB</div>
+                        <div><h4 class="text-sm font-bold text-slate-800 dark:text-white">Sarah & Budi</h4><p class="text-[10px] text-slate-500">Mempelai</p></div>
+                    </div>
+                </div>
+                <div class="w-[300px] flex-shrink-0 p-6 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg">
+                    <p class="text-slate-600 dark:text-slate-300 text-xs italic leading-relaxed mb-4 whitespace-normal">"Proses cepet, revisi nggak ribet. Makasih Malik Faza Studio!"</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center text-purple-600 dark:text-purple-300 font-bold text-xs">R</div>
+                        <div><h4 class="text-sm font-bold text-slate-800 dark:text-white">Rina</h4><p class="text-[10px] text-slate-500">Bandung</p></div>
+                    </div>
+                </div>
+                <div class="w-[300px] flex-shrink-0 p-6 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg">
+                    <p class="text-slate-600 dark:text-slate-300 text-xs italic leading-relaxed mb-4 whitespace-normal">"Suka banget sama desain Blue Elegant-nya. Tamu-tamu pada muji undangan digitalnya."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-600 dark:text-green-300 font-bold text-xs">D</div>
+                        <div><h4 class="text-sm font-bold text-slate-800 dark:text-white">Dinda</h4><p class="text-[10px] text-slate-500">Customer</p></div>
+                    </div>
+                </div>
+                <div class="w-[300px] flex-shrink-0 p-6 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg">
+                    <p class="text-slate-600 dark:text-slate-300 text-xs italic leading-relaxed mb-4 whitespace-normal">"Harganya terjangkau tapi kualitas premium. Recommended banget pokoknya."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900 flex items-center justify-center text-orange-600 dark:text-orange-300 font-bold text-xs">B</div>
+                        <div><h4 class="text-sm font-bold text-slate-800 dark:text-white">Bayu</h4><p class="text-[10px] text-slate-500">Jakarta</p></div>
+                    </div>
+                </div>
+                <div class="w-[300px] flex-shrink-0 p-6 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg">
+                    <p class="text-slate-600 dark:text-slate-300 text-xs italic leading-relaxed mb-4 whitespace-normal">"Awalnya ragu, eh ternyata hasilnya memuaskan. Fitur-fiturnya lengkap."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-pink-100 dark:bg-pink-900 flex items-center justify-center text-pink-600 dark:text-pink-300 font-bold text-xs">A</div>
+                        <div><h4 class="text-sm font-bold text-slate-800 dark:text-white">Anisa</h4><p class="text-[10px] text-slate-500">Surabaya</p></div>
+                    </div>
+                </div>
+                <div class="w-[300px] flex-shrink-0 p-6 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg">
+                    <p class="text-slate-600 dark:text-slate-300 text-xs italic leading-relaxed mb-4 whitespace-normal">"Praktis banget tinggal sebar link. Desainnya kekinian."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold text-xs">R</div>
+                        <div><h4 class="text-sm font-bold text-slate-800 dark:text-white">Rizky</h4><p class="text-[10px] text-slate-500">Customer</p></div>
+                    </div>
+                </div>
+                <div class="w-[300px] flex-shrink-0 p-6 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg">
+                    <p class="text-slate-600 dark:text-slate-300 text-xs italic leading-relaxed mb-4 whitespace-normal">"Pelayanan juara! Revisi dilayanin sampe bener-bener pas."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900 flex items-center justify-center text-rose-600 dark:text-rose-300 font-bold text-xs">PD</div>
+                        <div><h4 class="text-sm font-bold text-slate-800 dark:text-white">Putri & Dimas</h4><p class="text-[10px] text-slate-500">Mempelai</p></div>
+                    </div>
+                </div>
+                <div class="w-[300px] flex-shrink-0 p-6 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg">
+                    <p class="text-slate-600 dark:text-slate-300 text-xs italic leading-relaxed mb-4 whitespace-normal">"Undangannya keren, loadingnya cepet pas dibuka."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900 flex items-center justify-center text-teal-600 dark:text-teal-300 font-bold text-xs">F</div>
+                        <div><h4 class="text-sm font-bold text-slate-800 dark:text-white">Fajar</h4><p class="text-[10px] text-slate-500">Yogyakarta</p></div>
+                    </div>
+                </div>
+                <div class="w-[300px] flex-shrink-0 p-6 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg">
+                    <p class="text-slate-600 dark:text-slate-300 text-xs italic leading-relaxed mb-4 whitespace-normal">"Makasih kak, undangannya elegan banget. Pas sama tema nikahan kita."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900 flex items-center justify-center text-yellow-600 dark:text-yellow-300 font-bold text-xs">M</div>
+                        <div><h4 class="text-sm font-bold text-slate-800 dark:text-white">Maya</h4><p class="text-[10px] text-slate-500">Malang</p></div>
+                    </div>
+                </div>
+                <div class="w-[300px] flex-shrink-0 p-6 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg">
+                    <p class="text-slate-600 dark:text-slate-300 text-xs italic leading-relaxed mb-4 whitespace-normal">"Solusi terbaik buat yang mau nikah tapi gamau ribet cetak undangan fisik."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-300 font-bold text-xs">E</div>
+                        <div><h4 class="text-sm font-bold text-slate-800 dark:text-white">Eko</h4><p class="text-[10px] text-slate-500">Customer</p></div>
+                    </div>
+                </div>
+
+                <!-- Duplikasi Set 1 untuk Loop Mulus -->
+                <div class="w-[300px] flex-shrink-0 p-6 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg">
+                    <p class="text-slate-600 dark:text-slate-300 text-xs italic leading-relaxed mb-4 whitespace-normal">"Hasilnya cantik banget, sesuai ekspektasi! Adminnya juga ramah banget."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-sky-100 dark:bg-sky-900 flex items-center justify-center text-sky-600 dark:text-sky-300 font-bold text-xs">SB</div>
+                        <div><h4 class="text-sm font-bold text-slate-800 dark:text-white">Sarah & Budi</h4><p class="text-[10px] text-slate-500">Mempelai</p></div>
+                    </div>
+                </div>
+                <div class="w-[300px] flex-shrink-0 p-6 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg">
+                    <p class="text-slate-600 dark:text-slate-300 text-xs italic leading-relaxed mb-4 whitespace-normal">"Proses cepet, revisi nggak ribet. Makasih Malik Faza Studio!"</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center text-purple-600 dark:text-purple-300 font-bold text-xs">R</div>
+                        <div><h4 class="text-sm font-bold text-slate-800 dark:text-white">Rina</h4><p class="text-[10px] text-slate-500">Bandung</p></div>
+                    </div>
+                </div>
+                <div class="w-[300px] flex-shrink-0 p-6 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg">
+                    <p class="text-slate-600 dark:text-slate-300 text-xs italic leading-relaxed mb-4 whitespace-normal">"Suka banget sama desain Blue Elegant-nya. Tamu-tamu pada muji undangan digitalnya."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center text-green-600 dark:text-green-300 font-bold text-xs">D</div>
+                        <div><h4 class="text-sm font-bold text-slate-800 dark:text-white">Dinda</h4><p class="text-[10px] text-slate-500">Customer</p></div>
+                    </div>
+                </div>
+                <div class="w-[300px] flex-shrink-0 p-6 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg">
+                    <p class="text-slate-600 dark:text-slate-300 text-xs italic leading-relaxed mb-4 whitespace-normal">"Harganya terjangkau tapi kualitas premium. Recommended banget pokoknya."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-900 flex items-center justify-center text-orange-600 dark:text-orange-300 font-bold text-xs">B</div>
+                        <div><h4 class="text-sm font-bold text-slate-800 dark:text-white">Bayu</h4><p class="text-[10px] text-slate-500">Jakarta</p></div>
+                    </div>
+                </div>
+                <div class="w-[300px] flex-shrink-0 p-6 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg">
+                    <p class="text-slate-600 dark:text-slate-300 text-xs italic leading-relaxed mb-4 whitespace-normal">"Awalnya ragu, eh ternyata hasilnya memuaskan. Fitur-fiturnya lengkap."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-pink-100 dark:bg-pink-900 flex items-center justify-center text-pink-600 dark:text-pink-300 font-bold text-xs">A</div>
+                        <div><h4 class="text-sm font-bold text-slate-800 dark:text-white">Anisa</h4><p class="text-[10px] text-slate-500">Surabaya</p></div>
+                    </div>
+                </div>
+                <div class="w-[300px] flex-shrink-0 p-6 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg">
+                    <p class="text-slate-600 dark:text-slate-300 text-xs italic leading-relaxed mb-4 whitespace-normal">"Praktis banget tinggal sebar link. Desainnya kekinian."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-300 font-bold text-xs">R</div>
+                        <div><h4 class="text-sm font-bold text-slate-800 dark:text-white">Rizky</h4><p class="text-[10px] text-slate-500">Customer</p></div>
+                    </div>
+                </div>
+                <div class="w-[300px] flex-shrink-0 p-6 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg">
+                    <p class="text-slate-600 dark:text-slate-300 text-xs italic leading-relaxed mb-4 whitespace-normal">"Pelayanan juara! Revisi dilayanin sampe bener-bener pas."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-rose-100 dark:bg-rose-900 flex items-center justify-center text-rose-600 dark:text-rose-300 font-bold text-xs">PD</div>
+                        <div><h4 class="text-sm font-bold text-slate-800 dark:text-white">Putri & Dimas</h4><p class="text-[10px] text-slate-500">Mempelai</p></div>
+                    </div>
+                </div>
+                <div class="w-[300px] flex-shrink-0 p-6 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg">
+                    <p class="text-slate-600 dark:text-slate-300 text-xs italic leading-relaxed mb-4 whitespace-normal">"Undangannya keren, loadingnya cepet pas dibuka."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-teal-100 dark:bg-teal-900 flex items-center justify-center text-teal-600 dark:text-teal-300 font-bold text-xs">F</div>
+                        <div><h4 class="text-sm font-bold text-slate-800 dark:text-white">Fajar</h4><p class="text-[10px] text-slate-500">Yogyakarta</p></div>
+                    </div>
+                </div>
+                <div class="w-[300px] flex-shrink-0 p-6 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg">
+                    <p class="text-slate-600 dark:text-slate-300 text-xs italic leading-relaxed mb-4 whitespace-normal">"Makasih kak, undangannya elegan banget. Pas sama tema nikahan kita."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900 flex items-center justify-center text-yellow-600 dark:text-yellow-300 font-bold text-xs">M</div>
+                        <div><h4 class="text-sm font-bold text-slate-800 dark:text-white">Maya</h4><p class="text-[10px] text-slate-500">Malang</p></div>
+                    </div>
+                </div>
+                <div class="w-[300px] flex-shrink-0 p-6 rounded-2xl bg-white/60 dark:bg-white/5 backdrop-blur-md border border-slate-200 dark:border-white/10 shadow-lg">
+                    <p class="text-slate-600 dark:text-slate-300 text-xs italic leading-relaxed mb-4 whitespace-normal">"Solusi terbaik buat yang mau nikah tapi gamau ribet cetak undangan fisik."</p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-indigo-600 dark:text-indigo-300 font-bold text-xs">E</div>
+                        <div><h4 class="text-sm font-bold text-slate-800 dark:text-white">Eko</h4><p class="text-[10px] text-slate-500">Customer</p></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -380,9 +530,32 @@
         </div>
     </footer>
 
-    <!-- ===== MODALS ===== -->
+    <!-- Welcome Popup (Z-INDEX 999) -->
+    <div id="welcome-popup" class="fixed bottom-6 right-6 z-[999] hidden opacity-0 translate-y-10">
+        <!-- Expanded Content (Updated for Glassmorphism) -->
+        <div id="welcome-content" class="bg-white/70 dark:bg-[#0f172a]/70 backdrop-blur-lg border border-white/50 dark:border-white/10 p-5 rounded-2xl shadow-2xl max-w-[300px] relative transform transition-all duration-300 ring-1 ring-black/5">
+            <!-- Controls -->
+            <div class="absolute top-2 right-2 flex gap-2">
+                <button onclick="minimizeWelcome()" class="text-slate-500 dark:text-slate-400 hover:text-sky-500 transition-colors" title="Minimize"><i class="fas fa-minus"></i></button>
+                <button onclick="closeWelcome()" class="text-slate-500 dark:text-slate-400 hover:text-red-500 transition-colors" title="Tutup"><i class="fas fa-times"></i></button>
+            </div>
+            <!-- Body -->
+            <div class="text-center pt-2">
+                 <div class="w-12 h-12 bg-white/50 dark:bg-white/10 rounded-full flex items-center justify-center mx-auto mb-3 text-xl animate-bounce-slow shadow-sm border border-white/30">👋</div>
+                 <h3 class="font-heading font-bold text-slate-800 dark:text-white text-md mb-1 drop-shadow-sm">Selamat Datang!</h3>
+                 <p class="text-[11px] text-slate-700 dark:text-slate-200 mb-3 leading-relaxed font-medium">Bingung pilih desain? Atau mau tanya harga spesial hari ini? Yuk chat admin!</p>
+                 <a href="https://wa.me/6285161141114?text=Halo%20kak,%20saya%20tertarik%20dengan%20undangan%20digitalnya,%20boleh%20tanya-tanya?" target="_blank" class="block w-full py-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white font-bold rounded-lg text-xs hover:shadow-lg hover:brightness-110 transition-all flex items-center justify-center gap-2 shadow-md">
+                    <i class="fab fa-whatsapp text-lg"></i> Chat Admin (Japri)
+                 </a>
+            </div>
+        </div>
+        <!-- Minimized State (Hidden by default) -->
+        <button id="welcome-minimized" onclick="maximizeWelcome()" class="hidden w-12 h-12 bg-sky-500 dark:bg-cyan-600 text-white rounded-full items-center justify-center shadow-lg hover:scale-110 hover:shadow-sky-500/50 transition-all animate-pulse border-2 border-white dark:border-transparent">
+            <i class="fas fa-comment-dots text-xl"></i>
+        </button>
+    </div>
 
-    <!-- Admin Login Modal -->
+    <!-- Modals (Login, Form, FAQ) -->
     <div id="login-modal" class="modal hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/50 dark:bg-black/80 backdrop-blur-sm">
         <div class="bg-white dark:bg-[#0f172a] p-8 rounded-2xl border border-slate-200 dark:border-white/10 w-full max-w-xs relative text-center shadow-2xl">
             <button onclick="toggleAdminModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800 dark:hover:text-white"><i class="fas fa-times"></i></button>
@@ -397,14 +570,11 @@
         </div>
     </div>
 
-    <!-- Add/Edit Item Modal -->
     <div id="form-modal" class="modal hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/50 dark:bg-black/80 backdrop-blur-sm overflow-y-auto py-10">
         <div class="bg-white dark:bg-[#0f172a] p-8 rounded-2xl border border-slate-200 dark:border-white/10 w-full max-w-md relative shadow-2xl my-auto">
             <button onclick="closeFormModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800 dark:hover:text-white"><i class="fas fa-times"></i></button>
             <h3 id="form-title" class="text-xl font-bold text-slate-800 dark:text-white mb-6 font-heading">Tambah Desain</h3>
-            
             <input type="hidden" id="item-id">
-            
             <div class="space-y-4">
                 <div>
                     <label class="text-xs text-slate-500 dark:text-slate-400 mb-1 block">Judul Tema</label>
@@ -426,8 +596,6 @@
                     <label class="text-xs text-slate-500 dark:text-slate-400 mb-1 block">Tag (Opsional)</label>
                     <input type="text" id="item-tag" placeholder="Contoh: Premium, Best Seller" class="w-full px-4 py-2 bg-slate-50 dark:bg-black/50 border border-slate-200 dark:border-white/10 rounded-lg text-slate-800 dark:text-white focus:border-sky-500 dark:focus:border-cyan-500 focus:outline-none">
                 </div>
-                
-                <!-- Image Upload with Preview -->
                 <div>
                     <label class="text-xs text-slate-500 dark:text-slate-400 mb-1 block">Foto Sampul</label>
                     <div id="upload-area" class="relative w-full h-48 bg-slate-50 dark:bg-black/50 border-2 border-dashed border-slate-300 dark:border-white/20 rounded-lg flex items-center justify-center overflow-hidden group cursor-pointer hover:border-sky-500 dark:hover:border-cyan-500 transition-colors" tabindex="0">
@@ -439,20 +607,16 @@
                         </div>
                     </div>
                 </div>
-
                 <button onclick="saveItem()" class="w-full py-3 bg-gradient-to-r from-sky-500 to-blue-600 dark:from-cyan-600 dark:to-sky-500 text-white font-bold rounded-lg hover:shadow-lg transition-all mt-4">SIMPAN DATA</button>
             </div>
         </div>
     </div>
 
-    <!-- FAQ Modal (Add/Edit) -->
     <div id="faq-modal" class="modal hidden fixed inset-0 z-[200] flex items-center justify-center bg-black/50 dark:bg-black/80 backdrop-blur-sm">
         <div class="bg-white dark:bg-[#0f172a] p-8 rounded-2xl border border-slate-200 dark:border-white/10 w-full max-w-md relative shadow-2xl">
             <button onclick="closeFaqModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-800 dark:hover:text-white"><i class="fas fa-times"></i></button>
             <h3 id="faq-modal-title" class="text-xl font-bold text-slate-800 dark:text-white mb-6 font-heading">Tambah FAQ</h3>
-            
             <input type="hidden" id="faq-id">
-            
             <div class="space-y-4">
                 <div>
                     <label class="text-xs text-slate-500 dark:text-slate-400 mb-1 block">Pertanyaan</label>
@@ -475,7 +639,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // --- GANTI BAGIAN INI DENGAN CONFIG FIREBASE KAKAK ---
+        // --- KONFIGURASI FIREBASE ASLI ---
         const firebaseConfig = {
             apiKey: "AIzaSyBoNAKRutDNTT7QjBH1NzHU5sXX31bxjXM",
             authDomain: "katalog-82fbf.firebaseapp.com",
@@ -485,30 +649,14 @@
             appId: "1:410997646826:web:8d292ce5afb4955f2bbe93",
             measurementId: "G-220BRVP5H5"
         };
-        // -----------------------------------------------------
 
         // INITIAL DATA BACKUP (CATALOG)
         const initialData = [
-            { id: 1, title: "Blue Elegant", category: "pernikahan", image: "blue1.jpg", link: "https://wedding12.pages.dev/", tag: "Premium" },
-            { id: 2, title: "Sage Garden", category: "pernikahan", image: "black golden.jpg", link: "https://wedding8mf.pages.dev/", tag: "Best Seller" },
-            { id: 3, title: "Blue Islamic", category: "khitanan", image: "blue-islamic.jpg", link: "https://wedding10.pages.dev/", tag: "" },
-            { id: 4, title: "Pastel Baby", category: "aqiqah", image: "pastel-baby.jpg", link: "https://wedding7mf.pages.dev/", tag: "" },
-            { id: 5, title: "Ethnic Royal", category: "pernikahan", image: "ethnic-royal.jpg", link: "https://wedding6mf.pages.dev/", tag: "" },
-            { id: 6, title: "Dark Floral", category: "pernikahan", image: "dark-floral.jpg", link: "https://wedding3-arv.pages.dev/", tag: "" },
-            { id: 7, title: "Clean White", category: "pernikahan", image: "clean-white.jpg", link: "https://wedding2-us3.pages.dev/", tag: "" },
-            { id: 8, title: "Modern Fun", category: "khitanan", image: "modern-fun.jpg", link: "https://undangan-digital-9jj.pages.dev/", tag: "" },
-            { id: 9, title: "Golden Lantern", category: "aqiqah", image: "golden-lantern.jpg", link: "https://wdding4.pages.dev/", tag: "" },
-            { id: 10, title: "Blue Sky", category: "pernikahan", image: "blue-sky.jpg", link: "https://wedding5mf.pages.dev/", tag: "" },
-            { id: 11, title: "Navy Gold", category: "pernikahan", image: "navy-gold.jpg", link: "https://wedding13.pages.dev/", tag: "" },
-            { id: 12, title: "Kids Hero", category: "khitanan", image: "kids-hero.jpg", link: "https://wedding14.pages.dev/", tag: "" },
-            { id: 13, title: "Green Leaf", category: "aqiqah", image: "green-leaf.jpg", link: "https://wedding15.pages.dev/", tag: "" },
-            { id: 14, title: "Rustic Wood", category: "pernikahan", image: "rustic-wood.jpg", link: "https://wedding9mf.pages.dev/", tag: "" },
-            { id: 15, title: "Modern Gradient", category: "pernikahan", image: "modern-gradient.jpg", link: "https://wedding8mf.pages.dev/", tag: "" },
-            { id: 16, title: "Adventure", category: "khitanan", image: "adventure.jpg", link: "https://wedding10.pages.dev/", tag: "" },
-            { id: 17, title: "Cloudy Blue", category: "aqiqah", image: "cloudy-blue.jpg", link: "https://wedding7mf.pages.dev/", tag: "" },
-            { id: 18, title: "Javanese Classic", category: "pernikahan", image: "javanese-classic.jpg", link: "https://wedding6mf.pages.dev/", tag: "" },
-            { id: 19, title: "Mandala Gold", category: "pernikahan", image: "mandala-gold.jpg", link: "https://wedding3-arv.pages.dev/", tag: "" },
-            { id: 20, title: "Space Rocket", category: "khitanan", image: "space-rocket.jpg", link: "https://undangan-digital-9jj.pages.dev/", tag: "" },
+            { id: 1, title: "Blue Elegant", category: "pernikahan", image: "https://placehold.co/400x700/0f172a/22d3ee?text=Blue+Elegant", link: "#", tag: "Premium" },
+            { id: 2, title: "Sage Garden", category: "pernikahan", image: "https://placehold.co/400x700/0f172a/22d3ee?text=Sage+Garden", link: "#", tag: "Best Seller" },
+            { id: 3, title: "Blue Islamic", category: "khitanan", image: "https://placehold.co/400x700/0f172a/22d3ee?text=Blue+Islamic", link: "#", tag: "" },
+            { id: 4, title: "Pastel Baby", category: "aqiqah", image: "https://placehold.co/400x700/0f172a/22d3ee?text=Pastel+Baby", link: "#", tag: "" },
+            { id: 5, title: "Ethnic Royal", category: "pernikahan", image: "https://placehold.co/400x700/0f172a/22d3ee?text=Ethnic+Royal", link: "#", tag: "" },
         ];
 
         // INITIAL DATA BACKUP (FAQ)
@@ -520,30 +668,63 @@
         let app, db;
         let isFirebaseReady = false;
 
-        try {
-            if (firebaseConfig.apiKey !== "API_KEY_KAMU") {
+        // FUNGSI INIT GLOBAL
+        window.initializeFirebaseLogic = function() {
+            // Set Default Data Dulu (Supaya tidak blank)
+            window.catalogData = initialData;
+            window.faqData = initialFaqData;
+            window.renderCatalog();
+            window.renderFaq();
+
+            try {
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 isFirebaseReady = true;
-            } else {
-                console.warn("Firebase Config belum diisi!");
-            }
-        } catch(e) {
-            console.error("Firebase Error:", e);
-        }
+                console.log("Firebase initialized successfully");
 
-        // --- RESET DATABASE (DELETE ALL) ---
+                // Start Listeners
+                onSnapshot(collection(db, "catalogs"), (snapshot) => {
+                    if (!snapshot.empty) {
+                        const data = [];
+                        snapshot.forEach((doc) => {
+                            data.push({ id: doc.id, ...doc.data() });
+                        });
+                        window.catalogData = data; 
+                        window.renderCatalog(); // Re-render dengan data asli
+                    }
+                    // Jika kosong (empty), biarkan data demo (initialData)
+                }, (error) => {
+                    console.error("Snapshot error:", error);
+                    // Jika error (misal permission denied), tetap pakai demo
+                });
+
+                onSnapshot(collection(db, "faqs"), (snapshot) => {
+                    if (!snapshot.empty) {
+                        const data = [];
+                        snapshot.forEach((doc) => {
+                            data.push({ id: doc.id, ...doc.data() });
+                        });
+                        window.faqData = data;
+                        window.renderFaq();
+                    }
+                });
+
+            } catch(e) {
+                console.error("Firebase Init Error:", e);
+                // Fallback sudah diset di awal
+            }
+        };
+
+        // --- Expose Functions to Window ---
         window.resetDatabase = async function() {
-            if (!isFirebaseReady) return Swal.fire('Error', 'Firebase belum siap', 'error');
-            
+            if (!isFirebaseReady) return;
             Swal.fire({
                 title: 'Hapus SEMUA Data?',
-                text: "PERINGATAN: Semua katalog dan FAQ di database akan dihapus permanen! Database akan menjadi kosong (0).",
+                text: "PERINGATAN: Semua katalog dan FAQ di database akan dihapus permanen!.",
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: '#d33',
-                confirmButtonText: 'Ya, Hapus Semua!',
-                cancelButtonText: 'Batal'
+                confirmButtonText: 'Ya, Hapus Semua!'
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     Swal.showLoading();
@@ -556,55 +737,46 @@
                         await batch.commit();
                         Swal.fire('Terhapus', 'Database telah dikosongkan.', 'success');
                     } catch (e) {
-                        console.error(e);
-                        Swal.fire('Error', 'Gagal menghapus data: ' + e.message, 'error');
+                        Swal.fire('Error', 'Gagal menghapus data.', 'error');
                     }
                 }
             });
         }
 
-        // --- BATCH UPLOAD FUNCTION ---
         window.uploadInitialData = async function() {
-            if (!isFirebaseReady) return Swal.fire('Error', 'Firebase belum siap', 'error');
-            
+            if (!isFirebaseReady) return;
             Swal.fire({
                 title: 'Upload Data Bawaan?',
-                text: "Ini akan menambahkan 20 item katalog DAN FAQ bawaan ke database online Anda.",
+                text: "Upload data demo ke database online.",
                 icon: 'question',
                 showCancelButton: true,
-                confirmButtonText: 'Ya, Upload',
-                cancelButtonText: 'Batal'
+                confirmButtonText: 'Ya, Upload'
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     Swal.showLoading();
                     const batch = writeBatch(db);
-                    
                     initialData.forEach((item) => {
                         const docRef = doc(collection(db, "catalogs")); 
                         const { id, ...data } = item; 
                         batch.set(docRef, { ...data, createdAt: new Date() });
                     });
-
                     initialFaqData.forEach((item) => {
                         const docRef = doc(collection(db, "faqs"));
                         const { id, ...data } = item;
                         batch.set(docRef, { ...data, createdAt: new Date() });
                     });
-
                     try {
                         await batch.commit();
-                        Swal.fire('Sukses', 'Data bawaan berhasil diupload ke database!', 'success');
+                        Swal.fire('Sukses', 'Data berhasil diupload!', 'success');
                     } catch(e) {
-                        console.error(e);
-                        Swal.fire('Gagal', 'Terjadi kesalahan saat upload.', 'error');
+                        Swal.fire('Gagal', 'Terjadi kesalahan.', 'error');
                     }
                 }
             });
         }
 
         window.saveItem = async function() {
-            if (!isFirebaseReady) return Swal.fire('Error', 'Firebase belum dikonfigurasi!', 'error');
-
+            if (!isFirebaseReady) return;
             const id = document.getElementById('item-id').value;
             const title = document.getElementById('item-title').value;
             const category = document.getElementById('item-category').value;
@@ -616,9 +788,7 @@
                 Swal.fire({ icon: 'warning', text: 'Mohon lengkapi data (Judul, Link, Foto)' });
                 return;
             }
-
             Swal.showLoading();
-
             try {
                 if (id) {
                     await updateDoc(doc(db, "catalogs", id), { title, category, link, tag, image, updatedAt: new Date() });
@@ -628,21 +798,16 @@
                 closeFormModal();
                 Swal.fire({ icon: 'success', title: 'Berhasil', showConfirmButton: false, timer: 1000 });
             } catch (e) {
-                console.error(e);
                 Swal.fire('Error', 'Gagal menyimpan data.', 'error');
             }
         };
 
         window.deleteItem = async function(id) {
             if (!isFirebaseReady) return;
-             Swal.fire({
-                title: 'Hapus desain ini?', text: "Data tidak bisa dikembalikan!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, hapus!'
+            Swal.fire({
+                title: 'Hapus desain ini?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, hapus!'
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                    if (typeof id === 'number') {
-                         Swal.fire('Info', 'Ini data lokal. Silahkan upload ke database dulu untuk mengelola.', 'info');
-                         return;
-                    }
                     await deleteDoc(doc(db, "catalogs", id));
                     Swal.fire('Terhapus!', 'Desain telah dihapus.', 'success');
                 }
@@ -654,12 +819,10 @@
             const id = document.getElementById('faq-id').value;
             const q = document.getElementById('faq-question').value;
             const a = document.getElementById('faq-answer').value;
-
             if (!q || !a) {
                 Swal.fire({ icon: 'warning', text: 'Mohon isi pertanyaan dan jawaban' });
                 return;
             }
-
             Swal.showLoading();
             try {
                 if (id) {
@@ -680,53 +843,14 @@
                 title: 'Hapus FAQ ini?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, hapus!'
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                    if (typeof id === 'number') {
-                         Swal.fire('Info', 'Ini data lokal. Silahkan upload ke database dulu untuk mengelola.', 'info');
-                         return;
-                    }
                     await deleteDoc(doc(db, "faqs", id));
                     Swal.fire('Terhapus!', 'FAQ telah dihapus.', 'success');
                 }
             });
         }
 
-        // Realtime Listeners
-        if (isFirebaseReady) {
-            onSnapshot(collection(db, "catalogs"), (snapshot) => {
-                if (snapshot.empty) {
-                    window.catalogData = initialData;
-                    window.isUsingLocalData = true;
-                } else {
-                    const data = [];
-                    snapshot.forEach((doc) => {
-                        data.push({ id: doc.id, ...doc.data() });
-                    });
-                    window.catalogData = data; 
-                    window.isUsingLocalData = false;
-                }
-                window.renderCatalog();
-                window.updateAdminUI(); 
-            });
-
-            onSnapshot(collection(db, "faqs"), (snapshot) => {
-                if (snapshot.empty) {
-                    window.faqData = initialFaqData;
-                } else {
-                    const data = [];
-                    snapshot.forEach((doc) => {
-                        data.push({ id: doc.id, ...doc.data() });
-                    });
-                    window.faqData = data;
-                }
-                window.renderFaq();
-            });
-        } else {
-             // Fallback
-             window.catalogData = initialData;
-             window.faqData = initialFaqData;
-             window.renderCatalog();
-             window.renderFaq();
-        }
+        // Jalankan Init
+        window.initializeFirebaseLogic();
 
     </script>
 
@@ -734,17 +858,12 @@
     <script>
         AOS.init({ duration: 600, once: true, offset: 30 });
 
-        // Global Variables
-        window.catalogData = [];
-        window.faqData = [];
         window.isAdmin = false;
-        window.isUsingLocalData = false;
         window.tempImageBase64 = "";
         const ADMIN_PASS = "malikfaza99";
 
         // THEME HANDLING
         function initTheme() {
-            // Check localStorage
             if (localStorage.getItem('theme') === 'light') {
                 document.documentElement.classList.remove('dark');
                 updateThemeIcon(true);
@@ -765,18 +884,13 @@
                 localStorage.setItem('theme', 'dark');
                 updateThemeIcon(false);
             }
-            // Trigger resize to update particle background color
             window.dispatchEvent(new Event('resize')); 
         }
 
         function updateThemeIcon(isLight) {
             const iconDesktop = document.getElementById('theme-icon');
             const iconMobile = document.getElementById('theme-icon-mobile');
-            // If isLight is true (Light mode), icon should be Moon to switch to Dark
-            // If isLight is false (Dark mode), icon should be Sun to switch to Light
-            
             const newIcon = isLight ? 'fa-moon' : 'fa-sun';
-            
             if(iconDesktop) iconDesktop.className = `fas ${newIcon}`;
             if(iconMobile) iconMobile.className = `fas ${newIcon}`;
         }
@@ -788,25 +902,31 @@
             grid.innerHTML = '';
             
             let hasItem = false;
+            // Gunakan window.catalogData yang sudah diisi (entah demo atau firebase)
+            const dataToRender = window.catalogData || [];
 
-            window.catalogData.forEach(item => {
+            dataToRender.forEach(item => {
                 if (filter !== 'all' && item.category !== filter) return;
                 hasItem = true;
 
                 const card = document.createElement('div');
-                card.className = "catalog-item group relative rounded-2xl overflow-hidden transition-all duration-300 card-hover bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5";
+                card.className = "catalog-item group relative rounded-2xl overflow-hidden transition-all duration-300 card-hover bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 cursor-pointer";
                 card.setAttribute('data-aos', 'fade-up');
+                // Kartu tetap bisa trigger musik jika diklik di area kosong (opsional, bisa dihapus jika mau benar-benar manual)
+                card.setAttribute('onclick', 'ensureMusicPlaying()');
                 
                 const tagHtml = item.tag ? `<div class="absolute top-2 left-2 z-20"><span class="px-2 py-0.5 bg-sky-500/90 dark:bg-cyan-600/90 backdrop-blur-sm text-white text-[9px] font-bold rounded-lg uppercase tracking-wider shadow-lg">${item.tag}</span></div>` : '';
-                
                 const idParam = typeof item.id === 'string' ? `'${item.id}'` : item.id;
-
+                
                 const adminControls = window.isAdmin ? `
-                    <div class="absolute top-2 right-2 z-30 flex gap-2">
+                    <div class="absolute top-2 right-2 z-30 flex gap-2" onclick="event.stopPropagation()">
                         <button onclick="editItem(${idParam})" class="w-6 h-6 bg-yellow-500 rounded-full text-white text-[10px] flex items-center justify-center hover:bg-yellow-600 shadow-lg"><i class="fas fa-edit"></i></button>
                         <button onclick="deleteItem(${idParam})" class="w-6 h-6 bg-red-500 rounded-full text-white text-[10px] flex items-center justify-center hover:bg-red-600 shadow-lg"><i class="fas fa-trash"></i></button>
                     </div>
                 ` : '';
+                
+                const waText = `Halo kak, saya mau pesan tema "${item.title}".\n\nLink Preview: ${item.link}`;
+                const waUrl = `https://wa.me/6285161141114?text=${encodeURIComponent(waText)}`;
 
                 card.innerHTML = `
                     <div class="aspect-[9/16] overflow-hidden relative">
@@ -818,9 +938,9 @@
                     <div class="p-3 bg-white/90 dark:bg-[#020617]/90 backdrop-blur-md">
                         <p class="text-sky-500 dark:text-cyan-400 text-[9px] font-bold uppercase mb-0.5">${item.category}</p>
                         <h3 class="text-sm font-serif font-bold text-slate-800 dark:text-white mb-2 line-clamp-1">${item.title}</h3>
-                        <div class="flex gap-2 mt-2">
+                        <div class="flex gap-2 mt-2" onclick="event.stopPropagation()">
                             <a href="${item.link}" target="_blank" class="flex-1 py-2 text-center text-[10px] border border-slate-300 dark:border-white/20 rounded-xl text-slate-600 dark:text-white hover:bg-slate-100 dark:hover:bg-white hover:text-slate-800 dark:hover:text-black transition-colors">Preview</a>
-                            <a href="https://wa.me/6285161141114?text=Halo%20kak,%20saya%20mau%20pesan%20tema%20${encodeURIComponent(item.title)}" class="flex-1 py-2 text-center text-[10px] bg-gradient-to-r from-sky-500 to-blue-600 dark:from-cyan-600 dark:to-sky-500 text-white font-bold rounded-xl hover:brightness-110">Pesan</a>
+                            <a href="${waUrl}" target="_blank" class="flex-1 py-2 text-center text-[10px] bg-gradient-to-r from-sky-500 to-blue-600 dark:from-cyan-600 dark:to-sky-500 text-white font-bold rounded-xl hover:brightness-110">Pesan</a>
                         </div>
                     </div>
                 `;
@@ -833,22 +953,22 @@
             const container = document.getElementById('faq-list');
             container.innerHTML = '';
             
-            if(window.faqData.length === 0) {
+            const dataToRender = window.faqData || [];
+            
+            if(dataToRender.length === 0) {
                 container.innerHTML = `<div class="text-center text-slate-500 text-xs">Belum ada FAQ.</div>`;
                 return;
             }
 
-            window.faqData.forEach(item => {
+            dataToRender.forEach(item => {
                 const details = document.createElement('details');
                 details.className = "group bg-white dark:bg-[#0f172a]/60 border border-slate-200 dark:border-white/5 rounded-2xl open:bg-slate-50 dark:open:bg-[#0f172a]/80 transition-all duration-300 relative shadow-sm dark:shadow-none";
-                
                 const adminControls = window.isAdmin ? `
                     <div class="absolute right-12 top-4 flex gap-2 z-20">
                          <button onclick="editFaq('${item.id}')" class="text-yellow-500 hover:text-yellow-600 text-xs"><i class="fas fa-edit"></i></button>
                          <button onclick="deleteFaq('${item.id}')" class="text-red-500 hover:text-red-600 text-xs"><i class="fas fa-trash"></i></button>
                     </div>
                 ` : '';
-
                 details.innerHTML = `
                     <summary class="flex justify-between items-center p-4 cursor-pointer text-sm font-medium text-slate-700 dark:text-slate-200 hover:text-sky-500 dark:hover:text-cyan-300 pr-20">
                         <span>${item.q}</span>
@@ -865,27 +985,19 @@
 
         window.filterCatalog = function() { window.renderCatalog(); }
 
-        // --- ADMIN AUTH ---
         window.toggleAdminModal = function() { document.getElementById('login-modal').classList.toggle('hidden'); }
-
         window.togglePasswordVisibility = function() {
             const input = document.getElementById('admin-pass-input');
             const icon = document.getElementById('eye-icon');
             if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
+                input.type = 'text'; icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash');
             } else {
-                input.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
+                input.type = 'password'; icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye');
             }
         }
-
         document.getElementById('admin-pass-input').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') checkAdminLogin();
         });
-
         window.checkAdminLogin = function() {
             const pass = document.getElementById('admin-pass-input').value;
             if (pass === ADMIN_PASS) {
@@ -897,54 +1009,40 @@
                 Swal.fire({ icon: 'error', title: 'Gagal', text: 'Password salah!' });
             }
         }
-
         window.adminLogout = function() {
             window.isAdmin = false;
             window.updateAdminUI();
             Swal.fire({ icon: 'success', title: 'Logout', text: 'Kembali ke mode pengunjung', timer: 1500, showConfirmButton: false });
         }
-
         window.updateAdminUI = function() {
             const navAuthDesktop = document.getElementById('nav-auth-desktop');
             const navAuthMobile = document.getElementById('nav-auth-mobile');
             const adminTools = document.getElementById('admin-tools');
-            const badge = document.getElementById('admin-badge');
             const restoreBtn = document.getElementById('restore-data-btn');
             const resetBtn = document.getElementById('reset-data-btn');
 
             if (window.isAdmin) {
-                // Desktop
-                navAuthDesktop.innerHTML = '<i class="fas fa-sign-out-alt mr-2 text-xs"></i> Logout';
+                navAuthDesktop.innerHTML = '<i class="fas fa-sign-out-alt mr-2 text-xs"></i>';
                 navAuthDesktop.setAttribute('onclick', 'adminLogout()');
                 navAuthDesktop.classList.add('text-red-500', 'border-red-500');
                 navAuthDesktop.classList.remove('text-slate-500', 'border-slate-200');
-
-                // Mobile
                 navAuthMobile.innerHTML = '<i class="fas fa-sign-out-alt mr-2 text-xs"></i> Logout';
                 navAuthMobile.setAttribute('onclick', 'adminLogout()');
                 navAuthMobile.classList.add('text-red-500');
                 navAuthMobile.classList.remove('text-slate-500');
-
                 adminTools.classList.remove('hidden');
-                badge.classList.remove('hidden');
                 restoreBtn.classList.remove('hidden');
                 resetBtn.classList.remove('hidden');
-
             } else {
-                // Desktop
-                navAuthDesktop.innerHTML = '<i class="fas fa-lock mr-2 text-xs"></i> Login';
+                navAuthDesktop.innerHTML = '<i class="fas fa-lock mr-2 text-xs"></i>';
                 navAuthDesktop.setAttribute('onclick', 'toggleAdminModal()');
                 navAuthDesktop.classList.remove('text-red-500', 'border-red-500');
                 navAuthDesktop.classList.add('text-slate-500', 'border-slate-200');
-
-                // Mobile
                 navAuthMobile.innerHTML = '<i class="fas fa-lock mr-2 text-xs"></i> Login Admin';
                 navAuthMobile.setAttribute('onclick', 'toggleAdminModal()');
                 navAuthMobile.classList.remove('text-red-500');
                 navAuthMobile.classList.add('text-slate-500');
-
                 adminTools.classList.add('hidden');
-                badge.classList.add('hidden');
                 restoreBtn.classList.add('hidden');
                 resetBtn.classList.add('hidden');
             }
@@ -952,11 +1050,9 @@
             window.renderFaq();
         }
 
-        // --- CATALOG FORM ---
         window.openFormModal = function(isEdit = false, id = null) {
             const modal = document.getElementById('form-modal');
             const title = document.getElementById('form-title');
-            
             document.getElementById('item-id').value = '';
             document.getElementById('item-title').value = '';
             document.getElementById('item-category').value = 'pernikahan';
@@ -968,11 +1064,6 @@
             window.tempImageBase64 = "";
 
             if (isEdit && id) {
-                if (typeof id === 'number') {
-                    Swal.fire('Info', 'Data ini adalah preview lokal. Silahkan "Upload Data Bawaan" terlebih dahulu di menu Admin untuk mengeditnya.', 'info');
-                    return;
-                }
-
                 title.innerText = "Edit Desain";
                 const item = window.catalogData.find(d => d.id === id);
                 if (item) {
@@ -993,7 +1084,6 @@
             modal.classList.remove('hidden');
             document.getElementById('upload-area').focus();
         }
-
         window.closeFormModal = function() { document.getElementById('form-modal').classList.add('hidden'); }
         window.editItem = function(id) { openFormModal(true, id); }
 
@@ -1003,7 +1093,6 @@
             document.getElementById('faq-id').value = '';
             document.getElementById('faq-question').value = '';
             document.getElementById('faq-answer').value = '';
-
             if (isEdit && id) {
                 title.innerText = "Edit FAQ";
                 const item = window.faqData.find(f => f.id === id);
@@ -1017,28 +1106,21 @@
             }
             modal.classList.remove('hidden');
         }
-
         window.closeFaqModal = function() { document.getElementById('faq-modal').classList.add('hidden'); }
         window.editFaq = function(id) { openFaqModal(true, id); }
 
         window.previewImage = function(input) {
-            if (input.files && input.files[0]) {
-                processImage(input.files[0]);
-            }
+            if (input.files && input.files[0]) processImage(input.files[0]);
         }
-
         document.addEventListener('paste', function(event) {
             const formModal = document.getElementById('form-modal');
             if (formModal.classList.contains('hidden')) return;
             const items = (event.clipboardData || event.originalEvent.clipboardData).items;
             for (let index in items) {
                 const item = items[index];
-                if (item.kind === 'file' && item.type.startsWith('image/')) {
-                    processImage(item.getAsFile());
-                }
+                if (item.kind === 'file' && item.type.startsWith('image/')) processImage(item.getAsFile());
             }
         });
-
         function processImage(file) {
             const reader = new FileReader();
             reader.onload = function(event) {
@@ -1064,55 +1146,93 @@
             reader.readAsDataURL(file);
         }
 
-        const coverScreen = document.getElementById('cover-screen');
         const audio = document.getElementById('bg-audio');
-        const musicBtn = document.getElementById('music-btn');
         let isPlaying = false;
-
-        window.openCatalog = function() {
-            audio.play().then(() => {
-                isPlaying = true;
-                musicBtn.classList.add('music-rotating');
-            }).catch(error => {
-                isPlaying = false;
-                musicBtn.classList.remove('music-rotating');
-            });
-            coverScreen.classList.add('slide-up');
-            musicBtn.classList.remove('hidden');
-            document.body.style.overflow = 'auto';
+        window.ensureMusicPlaying = function() {
+            if (!isPlaying) toggleMusic();
         }
-
         window.toggleMusic = function() {
+            const btnDesktop = document.getElementById('music-btn-desktop');
+            const btnMobile = document.getElementById('music-btn-mobile');
             if (isPlaying) {
-                audio.pause();
-                isPlaying = false;
-                musicBtn.classList.remove('music-rotating');
+                audio.pause(); isPlaying = false;
+                if(btnDesktop) { btnDesktop.classList.remove('music-rotating'); btnDesktop.classList.remove('text-green-500'); }
+                if(btnMobile) { btnMobile.classList.remove('music-rotating'); btnMobile.classList.remove('text-green-500'); }
             } else {
-                audio.play();
-                isPlaying = true;
-                musicBtn.classList.add('music-rotating');
+                audio.play(); isPlaying = true;
+                if(btnDesktop) { btnDesktop.classList.add('music-rotating'); btnDesktop.classList.add('text-green-500'); }
+                if(btnMobile) { btnMobile.classList.add('music-rotating'); btnMobile.classList.add('text-green-500'); }
             }
         }
 
+        // --- WELCOME POPUP LOGIC ---
+        let hasWelcomePopupShown = false;
+        window.showWelcome = function() {
+            if (hasWelcomePopupShown) return;
+            const popup = document.getElementById('welcome-popup');
+            popup.classList.remove('hidden');
+            setTimeout(() => { popup.classList.remove('opacity-0', 'translate-y-10'); }, 50);
+            hasWelcomePopupShown = true;
+        }
+        window.closeWelcome = function() {
+            const popup = document.getElementById('welcome-popup');
+            popup.classList.add('opacity-0', 'translate-y-10');
+            setTimeout(() => { popup.classList.add('hidden'); }, 300);
+        }
+        window.minimizeWelcome = function() {
+            const content = document.getElementById('welcome-content');
+            const btn = document.getElementById('welcome-minimized');
+            content.style.transform = "scale(0.8)";
+            content.style.opacity = "0";
+            setTimeout(() => {
+                content.classList.add('hidden');
+                btn.classList.remove('hidden');
+                btn.classList.add('flex');
+            }, 200);
+        }
+        window.maximizeWelcome = function() {
+            const content = document.getElementById('welcome-content');
+            const btn = document.getElementById('welcome-minimized');
+            btn.classList.add('hidden');
+            btn.classList.remove('flex');
+            content.classList.remove('hidden');
+            setTimeout(() => {
+                content.style.transform = "scale(1)";
+                content.style.opacity = "1";
+            }, 50);
+        }
+
+        const catalogSection = document.getElementById('catalog');
+        if (catalogSection) {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) showWelcome();
+                });
+            }, { threshold: 0.1 }); 
+            observer.observe(catalogSection);
+        }
+        setTimeout(() => { showWelcome(); }, 3000);
+
         // --- STARS & PARTICLES ---
         const starsContainer = document.getElementById('stars-container');
-        for (let i = 0; i < 50; i++) {
-            const star = document.createElement('div');
-            star.classList.add('star');
-            star.style.left = `${Math.random() * 100}%`;
-            star.style.top = `${Math.random() * 100}%`;
-            const size = Math.random() * 3 + 1;
-            star.style.width = `${size}px`;
-            star.style.height = `${size}px`;
-            star.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
-            star.style.setProperty('--opacity', Math.random());
-            starsContainer.appendChild(star);
+        if (starsContainer) {
+             for (let i = 0; i < 50; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                const size = Math.random() * 3 + 1;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.setProperty('--duration', `${Math.random() * 3 + 2}s`);
+                star.style.setProperty('--opacity', Math.random());
+                starsContainer.appendChild(star);
+            }
         }
 
         const canvas = document.getElementById('canvas-bg');
         const ctx = canvas.getContext('2d');
         let width, height, particles = [];
-        
         function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
         
         class Particle {
@@ -1121,12 +1241,9 @@
                 this.x = Math.random() * width; this.y = Math.random() * height;
                 this.vx = (Math.random() - 0.5) * 0.2; this.vy = (Math.random() - 0.5) * 0.2;
                 this.size = Math.random() * 1.5 + 0.5; this.alpha = Math.random() * 0.5 + 0.2;
-                
-                // Color Logic based on Theme
                 const isDark = document.documentElement.classList.contains('dark');
-                const colors_dark = ['34, 211, 238', '56, 189, 248', '14, 165, 233']; // Cyan/Blue
-                const colors_light = ['14, 165, 233', '2, 132, 199', '56, 189, 248']; // Darker Blue for light bg
-                
+                const colors_dark = ['34, 211, 238', '56, 189, 248', '14, 165, 233'];
+                const colors_light = ['14, 165, 233', '2, 132, 199', '56, 189, 248'];
                 const palette = isDark ? colors_dark : colors_light;
                 this.color = palette[Math.floor(Math.random() * palette.length)];
             }
@@ -1156,15 +1273,48 @@
             requestAnimationFrame(animateParticles);
         }
         
-        window.addEventListener('resize', () => {
-            resize();
-            initParticles(); 
-        });
+        window.addEventListener('resize', () => { resize(); initParticles(); });
         
         initTheme(); 
         resize(); initParticles(); animateParticles();
-        
         window.toggleMobileMenu = function() { document.getElementById('mobile-menu').classList.toggle('hidden'); }
+
+        // --- NEW: STATS COUNTER ANIMATION ---
+        const statsSection = document.getElementById('stats');
+        const counters = document.querySelectorAll('.counter-value');
+        let hasAnimatedStats = false;
+
+        function animateCounters() {
+            counters.forEach(counter => {
+                const target = +counter.getAttribute('data-target');
+                const duration = 2000; // 2 seconds animation
+                const increment = target / (duration / 16); // 60 FPS approx
+
+                let current = 0;
+                const updateCounter = () => {
+                    current += increment;
+                    if (current < target) {
+                        counter.innerText = Math.ceil(current);
+                        requestAnimationFrame(updateCounter);
+                    } else {
+                        counter.innerText = target;
+                    }
+                };
+                updateCounter();
+            });
+        }
+
+        if (statsSection) {
+            const statsObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting && !hasAnimatedStats) {
+                        animateCounters();
+                        hasAnimatedStats = true;
+                    }
+                });
+            }, { threshold: 0.5 });
+            statsObserver.observe(statsSection);
+        }
 
     </script>
 </body>
