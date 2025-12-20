@@ -531,13 +531,13 @@
     </footer>
 
     <!-- Welcome Popup (Z-INDEX 999) -->
-    <div id="welcome-popup" class="fixed bottom-6 right-6 z-[700] hidden opacity-0 translate-y-10">
+    <div id="welcome-popup" class="fixed bottom-6 right-6 z-[999] hidden opacity-0 translate-y-10">
         <!-- Expanded Content (Updated for Glassmorphism) -->
         <div id="welcome-content" class="bg-white/70 dark:bg-[#0f172a]/70 backdrop-blur-lg border border-white/50 dark:border-white/10 p-5 rounded-2xl shadow-2xl max-w-[300px] relative transform transition-all duration-300 ring-1 ring-black/5">
             <!-- Controls -->
             <div class="absolute top-2 right-2 flex gap-2">
                 <button onclick="minimizeWelcome()" class="text-slate-500 dark:text-slate-400 hover:text-sky-500 transition-colors" title="Minimize"><i class="fas fa-minus"></i></button>
-                <button onclick="closeWelcome()" class="text-slate-500 dark:text-slate-400 hover:text-red-500 transition-colors" title="Tutup"><i class="fas fa-times"></i></button>
+                <!-- Tombol Close dihapus agar hanya bisa di-minimize -->
             </div>
             <!-- Body -->
             <div class="text-center pt-2">
@@ -1211,7 +1211,11 @@
             }, { threshold: 0.1 }); 
             observer.observe(catalogSection);
         }
-        setTimeout(() => { showWelcome(); }, 3000);
+        
+        // Trigger otomatis setelah 15 detik jika user diam saja (sebelumnya 3 detik)
+        setTimeout(() => {
+            showWelcome();
+        }, 15000);
 
         // --- STARS & PARTICLES ---
         const starsContainer = document.getElementById('stars-container');
@@ -1319,4 +1323,3 @@
     </script>
 </body>
 </html>
-
