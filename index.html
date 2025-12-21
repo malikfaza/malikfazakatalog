@@ -139,13 +139,17 @@
         @keyframes sweep { 0% {opacity: 0; margin-top: -10px} 100% {opacity: 1; margin-top: 0px} }
 
         #welcome-popup { transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
+        
+        /* Smooth Transition for Grid */
+        #catalog-grid { transition: opacity 0.3s ease-in-out; }
+        .grid-fading { opacity: 0.5; }
     </style>
 </head>
 <body class="antialiased selection:bg-cyan-500 selection:text-white transition-colors duration-500">
 
     <!-- AUDIO ELEMENT -->
     <audio id="bg-audio" loop>
-        <source src="musik.mp3" type="audio/mpeg">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
     </audio>
 
     <!-- Admin Floating Tools -->
@@ -266,6 +270,7 @@
                 </div>
             </div>
 
+            <!-- GRID 4 KOLOM (md:grid-cols-4) -->
             <div id="catalog-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 min-h-[400px]">
                 <div class="col-span-full text-center py-10 text-slate-500 animate-pulse">Memuat data...</div>
             </div>
@@ -689,8 +694,23 @@
                         snapshot.forEach((doc) => {
                             data.push({ id: doc.id, ...doc.data() });
                         });
-                        window.catalogData = data; 
-                        window.renderCatalog(); // Re-render dengan data asli
+                        
+                        // CEK PERUBAHAN DATA (MENCEGAH RE-RENDER JIKA DATA SAMA)
+                        if (JSON.stringify(window.catalogData) !== JSON.stringify(data)) {
+                            // Tambahkan efek fade out sebelum update
+                            const grid = document.getElementById('catalog-grid');
+                            if(grid) {
+                                grid.classList.add('grid-fading');
+                                setTimeout(() => {
+                                    window.catalogData = data; 
+                                    window.renderCatalog(); // Re-render dengan data asli
+                                    grid.classList.remove('grid-fading');
+                                }, 300); // Tunggu transisi selesai
+                            } else {
+                                window.catalogData = data; 
+                                window.renderCatalog();
+                            }
+                        }
                     }
                     // Jika kosong (empty), biarkan data demo (initialData)
                 }, (error) => {
@@ -704,8 +724,10 @@
                         snapshot.forEach((doc) => {
                             data.push({ id: doc.id, ...doc.data() });
                         });
-                        window.faqData = data;
-                        window.renderFaq();
+                        if (JSON.stringify(window.faqData) !== JSON.stringify(data)) {
+                            window.faqData = data;
+                            window.renderFaq();
+                        }
                     }
                 });
 
@@ -939,8 +961,8 @@
                         <p class="text-sky-500 dark:text-cyan-400 text-[9px] font-bold uppercase mb-0.5">${item.category}</p>
                         <h3 class="text-sm font-serif font-bold text-slate-800 dark:text-white mb-2 line-clamp-1">${item.title}</h3>
                         <div class="flex gap-2 mt-2" onclick="event.stopPropagation()">
-                            <a href="${item.link}" target="_blank" class="flex-1 py-2 text-center text-[10px] border border-slate-300 dark:border-white/20 rounded-xl text-slate-600 dark:text-white hover:bg-slate-100 dark:hover:bg-white hover:text-slate-800 dark:hover:text-black transition-colors">Preview</a>
-                            <a href="${waUrl}" target="_blank" class="flex-1 py-2 text-center text-[10px] bg-gradient-to-r from-sky-500 to-blue-600 dark:from-cyan-600 dark:to-sky-500 text-white font-bold rounded-xl hover:brightness-110">Pesan</a>
+                            <a href="${item.link}" target="_blank" onclick="ensureMusicPlaying()" class="flex-1 py-2 text-center text-[10px] border border-slate-300 dark:border-white/20 rounded-xl text-slate-600 dark:text-white hover:bg-slate-100 dark:hover:bg-white hover:text-slate-800 dark:hover:text-black transition-colors">Preview</a>
+                            <a href="${waUrl}" target="_blank" onclick="ensureMusicPlaying()" class="flex-1 py-2 text-center text-[10px] bg-gradient-to-r from-sky-500 to-blue-600 dark:from-cyan-600 dark:to-sky-500 text-white font-bold rounded-xl hover:brightness-110">Pesan</a>
                         </div>
                     </div>
                 `;
@@ -1211,11 +1233,7 @@
             }, { threshold: 0.1 }); 
             observer.observe(catalogSection);
         }
-        
-        // Trigger otomatis setelah 15 detik jika user diam saja (sebelumnya 3 detik)
-        setTimeout(() => {
-            showWelcome();
-        }, 15000);
+        setTimeout(() => { showWelcome(); }, 15000);
 
         // --- STARS & PARTICLES ---
         const starsContainer = document.getElementById('stars-container');
