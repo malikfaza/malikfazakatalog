@@ -21,6 +21,9 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <!-- SUPABASE SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -154,10 +157,19 @@
 
     <!-- Admin Floating Tools -->
     <div id="admin-tools" class="hidden">
+        <!-- Main Actions -->
         <button onclick="openFormModal()" class="fixed bottom-24 right-6 z-[60] w-12 h-12 bg-green-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-green-600 transition-all animate-bounce border-2 border-white dark:border-transparent" title="Tambah Desain"><i class="fas fa-plus"></i></button>
         <button onclick="openFaqModal()" class="fixed bottom-40 right-6 z-[60] w-12 h-12 bg-sky-500 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-sky-600 transition-all border-2 border-white dark:border-transparent" title="Tambah FAQ"><i class="fas fa-question"></i></button>
-        <button id="restore-data-btn" onclick="uploadInitialData()" class="fixed top-24 right-6 z-[60] px-4 py-2 bg-yellow-500 text-white rounded-full text-xs hover:bg-yellow-600 shadow-lg hidden font-bold"><i class="fas fa-cloud-upload-alt mr-2"></i> Upload Data Bawaan</button>
-        <button id="reset-data-btn" onclick="resetDatabase()" class="fixed top-36 right-6 z-[60] px-4 py-2 bg-red-500 text-white rounded-full text-xs hover:bg-red-600 shadow-lg hidden font-bold"><i class="fas fa-bomb mr-2"></i> Hapus Semua Data</button>
+        
+        <!-- Data Management -->
+        <button onclick="exportDataToJson()" class="fixed top-24 right-6 z-[60] px-4 py-2 bg-purple-600 text-white rounded-full text-xs hover:bg-purple-700 shadow-lg font-bold border border-white/20"><i class="fas fa-download mr-2"></i> Export JSON</button>
+        
+        <!-- NEW IMPORT BUTTON & INPUT -->
+        <input type="file" id="import-file-input" accept=".json" class="hidden" onchange="importDataFromJson(this)">
+        <button onclick="document.getElementById('import-file-input').click()" class="fixed top-36 right-6 z-[60] px-4 py-2 bg-indigo-600 text-white rounded-full text-xs hover:bg-indigo-700 shadow-lg font-bold border border-white/20"><i class="fas fa-file-import mr-2"></i> Import JSON</button>
+
+        <button id="restore-data-btn" onclick="uploadInitialData()" class="fixed top-48 right-6 z-[60] px-4 py-2 bg-yellow-500 text-white rounded-full text-xs hover:bg-yellow-600 shadow-lg hidden font-bold"><i class="fas fa-cloud-upload-alt mr-2"></i> Upload Default</button>
+        <button id="reset-data-btn" onclick="resetDatabase()" class="fixed top-60 right-6 z-[60] px-4 py-2 bg-red-500 text-white rounded-full text-xs hover:bg-red-600 shadow-lg hidden font-bold"><i class="fas fa-bomb mr-2"></i> Hapus Semua</button>
     </div>
 
     <canvas id="canvas-bg"></canvas>
@@ -275,7 +287,7 @@
                 <!-- DEFAULT LOADING STATE -->
                 <div class="col-span-full text-center py-20 text-slate-500 dark:text-slate-400 flex flex-col items-center justify-center">
                     <div class="w-8 h-8 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mb-3"></div>
-                    <span class="animate-pulse text-sm font-medium">Menghubungkan ke Database...</span>
+                    <span class="animate-pulse text-sm font-medium">Memuat Katalog...</span>
                 </div>
             </div>
 
@@ -541,7 +553,7 @@
 
     <!-- Welcome Popup (Z-INDEX 999) -->
     <div id="welcome-popup" class="fixed bottom-6 right-6 z-[999] hidden opacity-0 translate-y-10">
-        <!-- Expanded Content (Updated for Glassmorphism) -->
+        <!-- Expanded Content -->
         <div id="welcome-content" class="bg-white/70 dark:bg-[#0f172a]/70 backdrop-blur-lg border border-white/50 dark:border-white/10 p-5 rounded-2xl shadow-2xl max-w-[300px] relative transform transition-all duration-300 ring-1 ring-black/5">
             <!-- Controls -->
             <div class="absolute top-2 right-2 flex gap-2">
@@ -643,23 +655,38 @@
     <!-- Scripts -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     
-    <!-- FIREBASE MODULE SCRIPT -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    <!-- MAIN LOGIC -->
+    <script>
+        AOS.init({ duration: 600, once: true, offset: 30 });
 
-        // --- KONFIGURASI FIREBASE ASLI ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyBoNAKRutDNTT7QjBH1NzHU5sXX31bxjXM",
-            authDomain: "katalog-82fbf.firebaseapp.com",
-            projectId: "katalog-82fbf",
-            storageBucket: "katalog-82fbf.firebasestorage.app",
-            messagingSenderId: "410997646826",
-            appId: "1:410997646826:web:8d292ce5afb4955f2bbe93",
-            measurementId: "G-220BRVP5H5"
-        };
+        // Global Variables
+        window.catalogData = [];
+        window.faqData = [];
+        window.isAdmin = false;
+        window.tempImageBase64 = "";
+        const ADMIN_PASS = "malikfaza99";
+        
+        let supabaseClient; 
+        let isSupabaseReady = false;
 
-        // INITIAL DATA BACKUP (CATALOG) - Digunakan jika database kosong
+        // --- KONFIGURASI SUPABASE ---
+        const supabaseUrl = 'https://izmfdtngpagwjlcdwklq.supabase.co'; 
+        const supabaseKey = 'sb_publishable_2MRQf8CrSqASqSMrYw2nhA_0QfXx1wx'; // Public Key
+        
+        // Inisialisasi Supabase
+        try {
+            if (typeof window.supabase !== 'undefined') {
+                supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+                isSupabaseReady = true;
+                console.log("Supabase initialized");
+            } else {
+                console.warn("Supabase SDK not loaded.");
+            }
+        } catch(e) {
+            console.error("Supabase Init Error:", e);
+        }
+
+        // Default Data (Backup)
         const initialData = [
             { id: 1, title: "Blue Elegant", category: "pernikahan", image: "https://placehold.co/400x700/0f172a/22d3ee?text=BE", link: "#", tag: "Premium" },
             { id: 2, title: "Sage Garden", category: "pernikahan", image: "https://placehold.co/400x700/0f172a/4ade80?text=SG", link: "#", tag: "Best Seller" },
@@ -667,251 +694,331 @@
             { id: 4, title: "Pastel Baby", category: "aqiqah", image: "https://placehold.co/400x700/0f172a/f472b6?text=PB", link: "#", tag: "" },
             { id: 5, title: "Ethnic Royal", category: "pernikahan", image: "https://placehold.co/400x700/0f172a/facc15?text=ER", link: "#", tag: "" },
         ];
-
-        // INITIAL DATA BACKUP (FAQ)
+        
         const initialFaqData = [
             { id: 1, q: "Berapa lama prosesnya?", a: "Normalnya 1x24 jam. Kilat bisa 3-6 jam (ada biaya tambahan)." },
             { id: 2, q: "Bisa revisi data?", a: "Ya, revisi data (nama, tempat, waktu) gratis sepuasnya sampai hari H acara." }
         ];
 
-        let app, db;
-        let isFirebaseReady = false;
+        // --- FETCH DATA ---
+        window.fetchData = async function() {
+            // Tampilkan data awal (demo) langsung agar tidak blank
+            if (window.catalogData.length === 0) {
+                 window.catalogData = initialData;
+                 window.renderCatalog();
+            }
+            if (window.faqData.length === 0) {
+                 window.faqData = initialFaqData;
+                 window.renderFaq();
+            }
 
-        // FUNGSI INIT GLOBAL
-        window.initializeFirebaseLogic = function() {
-            // Hapus inisialisasi window.catalogData = initialData di sini
-            // Agar tidak ada data demo yang tampil duluan.
-            // Biarkan kosong dulu, nanti diisi oleh Firebase atau fallback timeout.
-            
+            if (!isSupabaseReady) return;
+
             try {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                isFirebaseReady = true;
-                console.log("Firebase initialized successfully");
-
-                // Start Listeners
-                onSnapshot(collection(db, "catalogs"), (snapshot) => {
-                    if (!snapshot.empty) {
-                        const data = [];
-                        snapshot.forEach((doc) => {
-                            data.push({ id: doc.id, ...doc.data() });
-                        });
-                        
-                        // CEK PERUBAHAN DATA (MENCEGAH RE-RENDER JIKA DATA SAMA)
-                        if (JSON.stringify(window.catalogData) !== JSON.stringify(data)) {
-                            const grid = document.getElementById('catalog-grid');
-                            if(grid) {
-                                grid.classList.add('grid-fading');
-                                setTimeout(() => {
-                                    window.catalogData = data; 
-                                    window.renderCatalog(); 
-                                    grid.classList.remove('grid-fading');
-                                }, 300); 
-                            } else {
-                                window.catalogData = data; 
-                                window.renderCatalog();
-                            }
-                        }
-                    } else {
-                        // Jika DB kosong, tampilkan empty state atau fallback ke initialData jika diinginkan
-                        // Untuk sekarang biarkan kosong agar konsisten "database source of truth"
-                        window.catalogData = [];
-                        window.renderCatalog();
-                    }
-                }, (error) => {
-                    console.error("Snapshot error:", error);
-                    // Jika error (misal offline/permission), baru gunakan data demo sebagai fallback
-                    // Agar user tidak melihat loading selamanya
-                    if (!window.catalogData || window.catalogData.length === 0) {
-                         window.catalogData = initialData;
+                // Fetch Catalogs
+                let { data: catalogs, error: catError } = await supabaseClient
+                    .from('catalogs')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (catError) throw catError;
+                
+                if (catalogs && catalogs.length > 0) {
+                    const isDifferent = JSON.stringify(window.catalogData) !== JSON.stringify(catalogs);
+                    if (isDifferent) {
+                         window.catalogData = catalogs;
                          window.renderCatalog();
                     }
-                });
-
-                onSnapshot(collection(db, "faqs"), (snapshot) => {
-                    if (!snapshot.empty) {
-                        const data = [];
-                        snapshot.forEach((doc) => {
-                            data.push({ id: doc.id, ...doc.data() });
-                        });
-                        if (JSON.stringify(window.faqData) !== JSON.stringify(data)) {
-                            window.faqData = data;
-                            window.renderFaq();
-                        }
-                    } else {
-                         window.faqData = [];
-                         window.renderFaq();
-                    }
-                });
-
-            } catch(e) {
-                console.error("Firebase Init Error:", e);
-                // Fallback jika init gagal total
-                window.catalogData = initialData;
-                window.faqData = initialFaqData;
-                window.renderCatalog();
-                window.renderFaq();
-            }
-            
-            // Timeout Fallback: Jika dalam 5 detik tidak ada data (misal koneksi lambat/error), tampilkan demo
-            setTimeout(() => {
-                const grid = document.getElementById('catalog-grid');
-                // Cek apakah masih dalam state loading (belum ada catalog-item)
-                if (grid && grid.innerHTML.includes('Menghubungkan ke Database')) {
-                    console.warn("Firebase timeout, loading demo data.");
-                    window.catalogData = initialData;
-                    window.renderCatalog();
                 }
-            }, 5000);
+
+                // Fetch FAQs
+                let { data: faqs, error: faqError } = await supabaseClient
+                    .from('faqs')
+                    .select('*')
+                    .order('created_at', { ascending: true });
+
+                if (faqError) throw faqError;
+
+                if (faqs && faqs.length > 0) {
+                    const isDifferent = JSON.stringify(window.faqData) !== JSON.stringify(faqs);
+                    if (isDifferent) {
+                        window.faqData = faqs;
+                        window.renderFaq();
+                    }
+                }
+
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
         };
 
-        // --- Expose Functions to Window ---
-        window.resetDatabase = async function() {
-            if (!isFirebaseReady) return;
-            Swal.fire({
-                title: 'Hapus SEMUA Data?',
-                text: "PERINGATAN: Semua katalog dan FAQ di database akan dihapus permanen!.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                confirmButtonText: 'Ya, Hapus Semua!'
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    Swal.showLoading();
-                    try {
-                        const batch = writeBatch(db);
-                        const catSnapshot = await getDocs(collection(db, "catalogs"));
-                        catSnapshot.forEach((doc) => { batch.delete(doc.ref); });
-                        const faqSnapshot = await getDocs(collection(db, "faqs"));
-                        faqSnapshot.forEach((doc) => { batch.delete(doc.ref); });
-                        await batch.commit();
-                        Swal.fire('Terhapus', 'Database telah dikosongkan.', 'success');
-                    } catch (e) {
-                        Swal.fire('Error', 'Gagal menghapus data.', 'error');
+        // --- IMPORT JSON DATA (DIPERBAIKI) ---
+        window.importDataFromJson = function(input) {
+            if (!isSupabaseReady) return Swal.fire('Error', 'Supabase belum dikonfigurasi', 'error');
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async function(e) {
+                try {
+                    const json = JSON.parse(e.target.result);
+                    
+                    Swal.fire({
+                        title: 'Importing...',
+                        text: 'Memasukkan data ke database...',
+                        allowOutsideClick: false,
+                        didOpen: () => Swal.showLoading()
+                    });
+
+                    // 1. Import Catalogs
+                    if (json.catalogs && Array.isArray(json.catalogs)) {
+                        const cleanCatalogs = json.catalogs.map(item => {
+                            // Ambil hanya kolom yang diperlukan untuk Supabase
+                            // Abaikan ID lama dan timestamp lama agar Supabase generate baru
+                            return {
+                                title: item.title,
+                                category: item.category,
+                                image: item.image,
+                                link: item.link,
+                                tag: item.tag || '' // handle missing tag
+                            };
+                        });
+                        
+                        const { error: catError } = await supabaseClient.from('catalogs').insert(cleanCatalogs);
+                        if (catError) throw catError;
                     }
+
+                    // 2. Import FAQs
+                    if (json.faqs && Array.isArray(json.faqs)) {
+                         const cleanFaqs = json.faqs.map(item => {
+                            return {
+                                q: item.q,
+                                a: item.a
+                            };
+                        });
+                        const { error: faqError } = await supabaseClient.from('faqs').insert(cleanFaqs);
+                        if (faqError) throw faqError;
+                    }
+
+                    Swal.fire('Sukses', 'Data JSON berhasil diimport!', 'success');
+                    fetchData(); // Refresh tampilan
+
+                } catch (err) {
+                    console.error(err);
+                    Swal.fire('Error', 'Gagal import JSON: ' + err.message, 'error');
                 }
-            });
+                // Reset input
+                input.value = '';
+            };
+            reader.readAsText(file);
+        };
+
+        // --- EXPORT JSON DATA ---
+        window.exportDataToJson = async function() {
+            if (!isSupabaseReady) return Swal.fire('Error', 'Supabase belum siap', 'error');
+            
+            Swal.fire({ title: 'Mengambil data...', didOpen: () => Swal.showLoading() });
+            
+            try {
+                // Fetch catalogs
+                const { data: catalogs, error: catError } = await supabaseClient.from('catalogs').select('*');
+                if (catError) throw catError;
+                
+                // Fetch faqs
+                const { data: faqs, error: faqError } = await supabaseClient.from('faqs').select('*');
+                if (faqError) throw faqError;
+                
+                // Create JSON
+                const data = {
+                    catalogs: catalogs || [],
+                    faqs: faqs || [],
+                    exportedAt: new Date().toISOString()
+                };
+                
+                // Trigger download
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `backup-katalog-${new Date().toISOString().slice(0,10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                Swal.close();
+            } catch (e) {
+                console.error(e);
+                Swal.fire('Error', 'Gagal export data: ' + e.message, 'error');
+            }
         }
 
-        window.uploadInitialData = async function() {
-            if (!isFirebaseReady) return;
-            Swal.fire({
-                title: 'Upload Data Bawaan?',
-                text: "Upload data demo ke database online.",
-                icon: 'question',
-                showCancelButton: true,
-                confirmButtonText: 'Ya, Upload'
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    Swal.showLoading();
-                    const batch = writeBatch(db);
-                    initialData.forEach((item) => {
-                        const docRef = doc(collection(db, "catalogs")); 
-                        const { id, ...data } = item; 
-                        batch.set(docRef, { ...data, createdAt: new Date() });
-                    });
-                    initialFaqData.forEach((item) => {
-                        const docRef = doc(collection(db, "faqs"));
-                        const { id, ...data } = item;
-                        batch.set(docRef, { ...data, createdAt: new Date() });
-                    });
-                    try {
-                        await batch.commit();
-                        Swal.fire('Sukses', 'Data berhasil diupload!', 'success');
-                    } catch(e) {
-                        Swal.fire('Gagal', 'Terjadi kesalahan.', 'error');
-                    }
-                }
-            });
-        }
-
+        // --- CRUD OPERATIONS ---
         window.saveItem = async function() {
-            if (!isFirebaseReady) return;
+            if (!isSupabaseReady) return Swal.fire('Error', 'Supabase belum dikonfigurasi', 'error');
+
             const id = document.getElementById('item-id').value;
             const title = document.getElementById('item-title').value;
             const category = document.getElementById('item-category').value;
             const link = document.getElementById('item-link').value;
             const tag = document.getElementById('item-tag').value;
-            const image = window.tempImageBase64;
+            const image = window.tempImageBase64; 
 
-            if (!title || !link || !image) {
-                Swal.fire({ icon: 'warning', text: 'Mohon lengkapi data (Judul, Link, Foto)' });
+            if (!title || !link) {
+                Swal.fire({ icon: 'warning', text: 'Mohon lengkapi data wajib (Judul, Link)' });
                 return;
             }
+
             Swal.showLoading();
+
+            const payload = { title, category, link, tag, image };
+
             try {
+                let error;
                 if (id) {
-                    await updateDoc(doc(db, "catalogs", id), { title, category, link, tag, image, updatedAt: new Date() });
+                    const { error: err } = await supabaseClient.from('catalogs').update(payload).eq('id', id);
+                    error = err;
                 } else {
-                    await addDoc(collection(db, "catalogs"), { title, category, link, tag, image, createdAt: new Date() });
+                    const { error: err } = await supabaseClient.from('catalogs').insert([payload]);
+                    error = err;
                 }
+
+                if (error) throw error;
+
                 closeFormModal();
                 Swal.fire({ icon: 'success', title: 'Berhasil', showConfirmButton: false, timer: 1000 });
+                fetchData(); 
             } catch (e) {
-                Swal.fire('Error', 'Gagal menyimpan data.', 'error');
+                console.error(e);
+                Swal.fire('Error', 'Gagal menyimpan: ' + e.message, 'error');
             }
         };
 
         window.deleteItem = async function(id) {
-            if (!isFirebaseReady) return;
+            if (!isSupabaseReady) return;
             Swal.fire({
                 title: 'Hapus desain ini?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, hapus!'
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                    await deleteDoc(doc(db, "catalogs", id));
-                    Swal.fire('Terhapus!', 'Desain telah dihapus.', 'success');
+                    const { error } = await supabaseClient.from('catalogs').delete().eq('id', id);
+                    if (error) {
+                        Swal.fire('Error', 'Gagal menghapus.', 'error');
+                    } else {
+                        Swal.fire('Terhapus!', 'Desain telah dihapus.', 'success');
+                        fetchData();
+                    }
                 }
             });
         };
 
         window.saveFaq = async function() {
-            if (!isFirebaseReady) return;
+            if (!isSupabaseReady) return;
             const id = document.getElementById('faq-id').value;
             const q = document.getElementById('faq-question').value;
             const a = document.getElementById('faq-answer').value;
-            if (!q || !a) {
-                Swal.fire({ icon: 'warning', text: 'Mohon isi pertanyaan dan jawaban' });
-                return;
-            }
+
+            if (!q || !a) return Swal.fire({ icon: 'warning', text: 'Mohon isi semua field' });
+
             Swal.showLoading();
+            const payload = { q, a };
+
             try {
+                let error;
                 if (id) {
-                    await updateDoc(doc(db, "faqs", id), { q, a });
+                    const { error: err } = await supabaseClient.from('faqs').update(payload).eq('id', id);
+                    error = err;
                 } else {
-                    await addDoc(collection(db, "faqs"), { q, a, createdAt: new Date() });
+                    const { error: err } = await supabaseClient.from('faqs').insert([payload]);
+                    error = err;
                 }
+                if (error) throw error;
                 closeFaqModal();
-                Swal.fire({ icon: 'success', title: 'FAQ Disimpan', showConfirmButton: false, timer: 1000 });
+                Swal.fire({ icon: 'success', title: 'Berhasil', showConfirmButton: false, timer: 1000 });
+                fetchData();
             } catch(e) {
-                 Swal.fire('Error', 'Gagal menyimpan FAQ.', 'error');
+                Swal.fire('Error', 'Gagal menyimpan.', 'error');
             }
         }
 
         window.deleteFaq = async function(id) {
-            if (!isFirebaseReady) return;
+            if (!isSupabaseReady) return;
             Swal.fire({
-                title: 'Hapus FAQ ini?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Ya, hapus!'
+                title: 'Hapus FAQ?', icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', confirmButtonText: 'Hapus'
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                    await deleteDoc(doc(db, "faqs", id));
-                    Swal.fire('Terhapus!', 'FAQ telah dihapus.', 'success');
+                    const { error } = await supabaseClient.from('faqs').delete().eq('id', id);
+                    if (!error) {
+                        Swal.fire('Terhapus!', '', 'success');
+                        fetchData();
+                    }
                 }
             });
         }
 
-        // Jalankan Init
-        window.initializeFirebaseLogic();
+        // --- UPLOAD INITIAL DATA ---
+        window.uploadInitialData = async function() {
+            if (!isSupabaseReady) return Swal.fire('Error', 'Supabase belum dikonfigurasi', 'error');
+            
+            Swal.fire({
+                title: 'Upload Data Bawaan?',
+                text: "Ini akan menambahkan item katalog bawaan ke Supabase.",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Ya, Upload',
+                cancelButtonText: 'Batal'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    Swal.showLoading();
+                    
+                    const { error: catError } = await supabaseClient.from('catalogs').insert(initialData.map(({ id, ...rest }) => rest));
+                    if(catError) {
+                        console.error(catError);
+                        return Swal.fire('Gagal', 'Gagal upload katalog: ' + catError.message, 'error');
+                    }
 
-    </script>
+                    const { error: faqError } = await supabaseClient.from('faqs').insert(initialFaqData.map(({ id, ...rest }) => rest));
+                    if(faqError) {
+                        console.error(faqError);
+                        return Swal.fire('Gagal', 'Gagal upload FAQ: ' + faqError.message, 'error');
+                    }
 
-    <!-- Main Logic Script (UI) -->
-    <script>
-        AOS.init({ duration: 600, once: true, offset: 30 });
+                    Swal.fire('Sukses', 'Data bawaan berhasil diupload ke database!', 'success');
+                    fetchData(); 
+                }
+            });
+        }
 
-        window.isAdmin = false;
-        window.tempImageBase64 = "";
-        const ADMIN_PASS = "malikfaza99";
+        window.resetDatabase = async function() {
+            if (!isSupabaseReady) return;
+            
+            Swal.fire({
+                title: 'Hapus SEMUA Data?',
+                text: "PERINGATAN: Semua katalog dan FAQ di Supabase akan dihapus permanen!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                confirmButtonText: 'Ya, Hapus Semua!',
+                cancelButtonText: 'Batal'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    Swal.showLoading();
+                    
+                    // Delete All Catalogs (trick: id is likely not null)
+                    const { error: catError } = await supabaseClient.from('catalogs').delete().neq('title', 'THIS_STRING_DOES_NOT_EXIST_XYZ'); 
+                    
+                    const { error: faqError } = await supabaseClient.from('faqs').delete().neq('q', 'THIS_STRING_DOES_NOT_EXIST_XYZ');
 
+                    if (catError || faqError) {
+                        console.log("Bulk delete failed, trying manual loop...");
+                    } 
+                    
+                    Swal.fire('Terhapus', 'Database telah dikosongkan (jika policy mengizinkan).', 'success');
+                    fetchData();
+                }
+            });
+        }
+
+        // --- UI FUNCTIONS ---
         // THEME HANDLING
         function initTheme() {
             if (localStorage.getItem('theme') === 'light') {
@@ -945,15 +1052,19 @@
             if(iconMobile) iconMobile.className = `fas ${newIcon}`;
         }
 
-        // --- RENDER FUNCTIONS ---
+        // RENDER CATALOG
         window.renderCatalog = function() {
             const grid = document.getElementById('catalog-grid');
             const filter = document.getElementById('category-filter').value;
             grid.innerHTML = '';
             
             let hasItem = false;
-            // Gunakan window.catalogData yang sudah diisi (entah demo atau firebase)
             const dataToRender = window.catalogData || [];
+
+            if (dataToRender.length === 0) {
+                 grid.innerHTML = `<div class="col-span-full text-center py-20 text-slate-500">Belum ada data.</div>`;
+                 return;
+            }
 
             dataToRender.forEach(item => {
                 if (filter !== 'all' && item.category !== filter) return;
@@ -962,12 +1073,14 @@
                 const card = document.createElement('div');
                 card.className = "catalog-item group relative rounded-2xl overflow-hidden transition-all duration-300 card-hover bg-white dark:bg-white/5 border border-slate-100 dark:border-white/5 cursor-pointer";
                 card.setAttribute('data-aos', 'fade-up');
-                // Kartu tetap bisa trigger musik jika diklik di area kosong (opsional, bisa dihapus jika mau benar-benar manual)
+                
+                // Tambahkan event onclick untuk memutar musik saat katalog diklik
                 card.setAttribute('onclick', 'ensureMusicPlaying()');
                 
                 const tagHtml = item.tag ? `<div class="absolute top-2 left-2 z-20"><span class="px-2 py-0.5 bg-sky-500/90 dark:bg-cyan-600/90 backdrop-blur-sm text-white text-[9px] font-bold rounded-lg uppercase tracking-wider shadow-lg">${item.tag}</span></div>` : '';
-                const idParam = typeof item.id === 'string' ? `'${item.id}'` : item.id;
                 
+                const idParam = typeof item.id === 'string' ? `'${item.id}'` : item.id;
+
                 const adminControls = window.isAdmin ? `
                     <div class="absolute top-2 right-2 z-30 flex gap-2" onclick="event.stopPropagation()">
                         <button onclick="editItem(${idParam})" class="w-6 h-6 bg-yellow-500 rounded-full text-white text-[10px] flex items-center justify-center hover:bg-yellow-600 shadow-lg"><i class="fas fa-edit"></i></button>
@@ -989,8 +1102,8 @@
                         <p class="text-sky-500 dark:text-cyan-400 text-[9px] font-bold uppercase mb-0.5">${item.category}</p>
                         <h3 class="text-sm font-serif font-bold text-slate-800 dark:text-white mb-2 line-clamp-1">${item.title}</h3>
                         <div class="flex gap-2 mt-2" onclick="event.stopPropagation()">
-                            <a href="${item.link}" target="_blank" onclick="ensureMusicPlaying()" class="flex-1 py-2 text-center text-[10px] border border-slate-300 dark:border-white/20 rounded-xl text-slate-600 dark:text-white hover:bg-slate-100 dark:hover:bg-white hover:text-slate-800 dark:hover:text-black transition-colors">Preview</a>
-                            <a href="${waUrl}" target="_blank" onclick="ensureMusicPlaying()" class="flex-1 py-2 text-center text-[10px] bg-gradient-to-r from-sky-500 to-blue-600 dark:from-cyan-600 dark:to-sky-500 text-white font-bold rounded-xl hover:brightness-110">Pesan</a>
+                            <a href="${item.link}" target="_blank" class="flex-1 py-2 text-center text-[10px] border border-slate-300 dark:border-white/20 rounded-xl text-slate-600 dark:text-white hover:bg-slate-100 dark:hover:bg-white hover:text-slate-800 dark:hover:text-black transition-colors">Preview</a>
+                            <a href="${waUrl}" target="_blank" class="flex-1 py-2 text-center text-[10px] bg-gradient-to-r from-sky-500 to-blue-600 dark:from-cyan-600 dark:to-sky-500 text-white font-bold rounded-xl hover:brightness-110">Pesan</a>
                         </div>
                     </div>
                 `;
@@ -1002,7 +1115,6 @@
         window.renderFaq = function() {
             const container = document.getElementById('faq-list');
             container.innerHTML = '';
-            
             const dataToRender = window.faqData || [];
             
             if(dataToRender.length === 0) {
@@ -1039,11 +1151,8 @@
         window.togglePasswordVisibility = function() {
             const input = document.getElementById('admin-pass-input');
             const icon = document.getElementById('eye-icon');
-            if (input.type === 'password') {
-                input.type = 'text'; icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash');
-            } else {
-                input.type = 'password'; icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye');
-            }
+            if (input.type === 'password') { input.type = 'text'; icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash'); }
+            else { input.type = 'password'; icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye'); }
         }
         document.getElementById('admin-pass-input').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') checkAdminLogin();
@@ -1099,7 +1208,6 @@
             window.renderCatalog(); 
             window.renderFaq();
         }
-
         window.openFormModal = function(isEdit = false, id = null) {
             const modal = document.getElementById('form-modal');
             const title = document.getElementById('form-title');
@@ -1136,7 +1244,6 @@
         }
         window.closeFormModal = function() { document.getElementById('form-modal').classList.add('hidden'); }
         window.editItem = function(id) { openFormModal(true, id); }
-
         window.openFaqModal = function(isEdit = false, id = null) {
             const modal = document.getElementById('faq-modal');
             const title = document.getElementById('faq-modal-title');
@@ -1215,7 +1322,6 @@
             }
         }
 
-        // --- WELCOME POPUP LOGIC ---
         let hasWelcomePopupShown = false;
         window.showWelcome = function() {
             if (hasWelcomePopupShown) return;
@@ -1324,22 +1430,17 @@
         }
         
         window.addEventListener('resize', () => { resize(); initParticles(); });
-        
-        initTheme(); 
-        resize(); initParticles(); animateParticles();
+        initTheme(); resize(); initParticles(); animateParticles();
         window.toggleMobileMenu = function() { document.getElementById('mobile-menu').classList.toggle('hidden'); }
 
-        // --- NEW: STATS COUNTER ANIMATION ---
         const statsSection = document.getElementById('stats');
         const counters = document.querySelectorAll('.counter-value');
         let hasAnimatedStats = false;
-
         function animateCounters() {
             counters.forEach(counter => {
                 const target = +counter.getAttribute('data-target');
-                const duration = 2000; // 2 seconds animation
-                const increment = target / (duration / 16); // 60 FPS approx
-
+                const duration = 2000;
+                const increment = target / (duration / 16); 
                 let current = 0;
                 const updateCounter = () => {
                     current += increment;
@@ -1353,7 +1454,6 @@
                 updateCounter();
             });
         }
-
         if (statsSection) {
             const statsObserver = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
@@ -1365,6 +1465,9 @@
             }, { threshold: 0.5 });
             statsObserver.observe(statsSection);
         }
+
+        // Jalankan Fetch
+        fetchData();
 
     </script>
 </body>
