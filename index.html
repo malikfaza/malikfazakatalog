@@ -272,7 +272,11 @@
 
             <!-- GRID 4 KOLOM (md:grid-cols-4) -->
             <div id="catalog-grid" class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 min-h-[400px]">
-                <div class="col-span-full text-center py-10 text-slate-500 animate-pulse">Memuat data...</div>
+                <!-- DEFAULT LOADING STATE -->
+                <div class="col-span-full text-center py-20 text-slate-500 dark:text-slate-400 flex flex-col items-center justify-center">
+                    <div class="w-8 h-8 border-4 border-sky-500 border-t-transparent rounded-full animate-spin mb-3"></div>
+                    <span class="animate-pulse text-sm font-medium">Menghubungkan ke Database...</span>
+                </div>
             </div>
 
             <div id="empty-state" class="hidden py-8 text-center">
@@ -675,12 +679,10 @@
 
         // FUNGSI INIT GLOBAL
         window.initializeFirebaseLogic = function() {
-            // Set Default Data Dulu (Supaya tidak blank)
-            window.catalogData = initialData;
-            window.faqData = initialFaqData;
-            window.renderCatalog();
-            window.renderFaq();
-
+            // Hapus inisialisasi window.catalogData = initialData di sini
+            // Agar tidak ada data demo yang tampil duluan.
+            // Biarkan kosong dulu, nanti diisi oleh Firebase atau fallback timeout.
+            
             try {
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
@@ -697,25 +699,33 @@
                         
                         // CEK PERUBAHAN DATA (MENCEGAH RE-RENDER JIKA DATA SAMA)
                         if (JSON.stringify(window.catalogData) !== JSON.stringify(data)) {
-                            // Tambahkan efek fade out sebelum update
                             const grid = document.getElementById('catalog-grid');
                             if(grid) {
                                 grid.classList.add('grid-fading');
                                 setTimeout(() => {
                                     window.catalogData = data; 
-                                    window.renderCatalog(); // Re-render dengan data asli
+                                    window.renderCatalog(); 
                                     grid.classList.remove('grid-fading');
-                                }, 300); // Tunggu transisi selesai
+                                }, 300); 
                             } else {
                                 window.catalogData = data; 
                                 window.renderCatalog();
                             }
                         }
+                    } else {
+                        // Jika DB kosong, tampilkan empty state atau fallback ke initialData jika diinginkan
+                        // Untuk sekarang biarkan kosong agar konsisten "database source of truth"
+                        window.catalogData = [];
+                        window.renderCatalog();
                     }
-                    // Jika kosong (empty), biarkan data demo (initialData)
                 }, (error) => {
                     console.error("Snapshot error:", error);
-                    // Jika error (misal permission denied), tetap pakai demo
+                    // Jika error (misal offline/permission), baru gunakan data demo sebagai fallback
+                    // Agar user tidak melihat loading selamanya
+                    if (!window.catalogData || window.catalogData.length === 0) {
+                         window.catalogData = initialData;
+                         window.renderCatalog();
+                    }
                 });
 
                 onSnapshot(collection(db, "faqs"), (snapshot) => {
@@ -728,13 +738,31 @@
                             window.faqData = data;
                             window.renderFaq();
                         }
+                    } else {
+                         window.faqData = [];
+                         window.renderFaq();
                     }
                 });
 
             } catch(e) {
                 console.error("Firebase Init Error:", e);
-                // Fallback sudah diset di awal
+                // Fallback jika init gagal total
+                window.catalogData = initialData;
+                window.faqData = initialFaqData;
+                window.renderCatalog();
+                window.renderFaq();
             }
+            
+            // Timeout Fallback: Jika dalam 5 detik tidak ada data (misal koneksi lambat/error), tampilkan demo
+            setTimeout(() => {
+                const grid = document.getElementById('catalog-grid');
+                // Cek apakah masih dalam state loading (belum ada catalog-item)
+                if (grid && grid.innerHTML.includes('Menghubungkan ke Database')) {
+                    console.warn("Firebase timeout, loading demo data.");
+                    window.catalogData = initialData;
+                    window.renderCatalog();
+                }
+            }, 5000);
         };
 
         // --- Expose Functions to Window ---
